@@ -47,15 +47,28 @@ export default defineContentScript({
     const { words = [] } = await chrome.storage.local.get('words');
     if ((words as Word[]).length === 0) return;
 
-    // Inject the overlay
-    const container = document.createElement('div');
-    container.id = 'i-speak-hello-blocker';
-    document.documentElement.appendChild(container);
+    // Inject the overlay using Shadow DOM for full CSS isolation from host page
+    const host = document.createElement('div');
+    host.id = 'i-speak-hello-blocker';
+    document.documentElement.appendChild(host);
+
+    const shadow = host.attachShadow({ mode: 'open' });
+
+    // Reset all styles inside shadow DOM so host page CSS cannot leak in
+    const style = document.createElement('style');
+    style.textContent = `
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      button { font-family: inherit; cursor: pointer; }
+    `;
+    shadow.appendChild(style);
+
+    const mountPoint = document.createElement('div');
+    shadow.appendChild(mountPoint);
 
     // Prevent scrolling on the page behind the overlay
     document.documentElement.style.overflow = 'hidden';
 
-    const root = ReactDOM.createRoot(container);
+    const root = ReactDOM.createRoot(mountPoint);
     root.render(
       <SiteBlockerOverlay
         settings={config}
@@ -71,7 +84,7 @@ export default defineContentScript({
           document.documentElement.style.overflow = '';
 
           root.unmount();
-          container.remove();
+          host.remove();
         }}
       />
     );

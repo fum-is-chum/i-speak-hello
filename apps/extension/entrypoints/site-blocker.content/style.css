@@ -1,8 +1,6 @@
 #i-speak-hello-blocker {
   all: initial;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-}
-
-#i-speak-hello-blocker * {
-  box-sizing: border-box;
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
 }
