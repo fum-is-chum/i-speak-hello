@@ -1,0 +1,10 @@
+{
+  "name": "i-speak-hello",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter extension dev",
+    "build": "pnpm --filter extension build",
+    "dev:shared": "pnpm --filter @i-speak-hello/shared dev",
+    "build:shared": "pnpm --filter @i-speak-hello/shared build"
+  }
+}

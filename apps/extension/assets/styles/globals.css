@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+/* Use class-based dark mode instead of media query */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-primary: #6366f1;
+  --color-primary-light: #818cf8;
+  --color-primary-dark: #4f46e5;
+  --color-success: #22c55e;
+  --color-danger: #ef4444;
+  --color-warning: #f59e0b;
+
+  /* Pinyin tone colors (light mode) */
+  --color-tone-1: #ef4444;
+  --color-tone-2: #f97316;
+  --color-tone-3: #22c55e;
+  --color-tone-4: #3b82f6;
+  --color-tone-5: #9ca3af;
+
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+/* Brighter pinyin tone colors for dark mode */
+.dark {
+  --color-tone-1: #f87171;
+  --color-tone-2: #fb923c;
+  --color-tone-3: #4ade80;
+  --color-tone-4: #60a5fa;
+  --color-tone-5: #d1d5db;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
