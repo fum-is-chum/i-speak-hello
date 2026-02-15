@@ -5,6 +5,7 @@ import { useSettingsStore } from '../../src/stores/settingsStore';
 import { exportData, importData, downloadBackupFile, readBackupFile, getLastBackupTimestamp } from '../../src/lib/backup';
 import { cn } from '../../src/lib/cn';
 import { useTheme } from '../../src/hooks/useTheme';
+import { ExcelImportSection } from '../../src/components/import/ExcelImportSection';
 
 const ALL_QUIZ_TYPES: { key: QuizType; label: string; desc: string }[] = [
   { key: 'flashcard', label: '🃏 Flashcard', desc: 'Kartu bolak-balik' },
@@ -593,6 +594,9 @@ export default function App() {
             </div>
           )}
         </section>
+
+        {/* Excel Import */}
+        <ExcelImportSection />
 
         {/* Backup & Restore */}
         <section className="mb-8 rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">

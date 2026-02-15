@@ -180,7 +180,9 @@ export default function App() {
           )}
           {activeTab === 'words' && <WordList />}
           {activeTab === 'add' && (
-            <WordForm onSaved={() => setActiveTab('words')} />
+            <>
+              <WordForm onSaved={() => setActiveTab('words')} />
+            </>
           )}
         </main>
       </div>
