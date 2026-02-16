@@ -7,6 +7,7 @@ interface WordState {
   loading: boolean;
   loadWords: () => Promise<void>;
   addWord: (input: WordCreateInput) => Promise<Word>;
+  addWords: (inputs: WordCreateInput[]) => Promise<Word[]>;
   updateWord: (id: string, updates: Partial<Word>) => Promise<void>;
   deleteWord: (id: string) => Promise<void>;
   addSentences: (wordId: string, sentences: Sentence[]) => Promise<void>;
@@ -29,6 +30,12 @@ export const useWordStore = create<WordState>((set, get) => ({
     const word = await storage.addWord(input);
     set(state => ({ words: [...state.words, word] }));
     return word;
+  },
+
+  addWords: async (inputs) => {
+    const newWords = await storage.addWords(inputs);
+    set(state => ({ words: [...state.words, ...newWords] }));
+    return newWords;
   },
 
   updateWord: async (id, updates) => {

@@ -52,6 +52,28 @@ export async function updateWord(id: string, updates: Partial<Word>): Promise<Wo
   return words[idx];
 }
 
+export async function addWords(inputs: WordCreateInput[]): Promise<Word[]> {
+  const words = await getWords();
+  const now = Date.now();
+  const newWords: Word[] = inputs.map((input, i) => ({
+    id: generateId(),
+    ...input,
+    translation: input.translation ?? '',
+    source: input.source ?? 'manual',
+    difficulty: 0,
+    sentences: [],
+    easeFactor: 2.5,
+    intervalDays: 0,
+    repetitions: 0,
+    nextReviewAt: now,
+    createdAt: now - i,
+    updatedAt: now,
+  }));
+  words.push(...newWords);
+  await chrome.storage.local.set({ words });
+  return newWords;
+}
+
 export async function deleteWord(id: string): Promise<boolean> {
   const words = await getWords();
   const filtered = words.filter(w => w.id !== id);
