@@ -328,12 +328,12 @@ export function SiteBlockerOverlay({ settings, words, hostname, onUnlock }: Prop
                   fontSize: '16px',
                   color: colors.pinyinText,
                   marginBottom: '20px',
-                  filter: pinyinRevealed ? 'none' : 'blur(6px)',
-                  cursor: pinyinRevealed ? 'default' : 'pointer',
+                  filter: (pinyinRevealed || showResult) ? 'none' : 'blur(6px)',
+                  cursor: (pinyinRevealed || showResult) ? 'default' : 'pointer',
                   transition: 'filter 0.2s',
                   userSelect: 'none',
                 }}
-                title={pinyinRevealed ? undefined : 'Klik untuk melihat pinyin'}
+                title={(!pinyinRevealed && !showResult) ? 'Klik untuk melihat pinyin' : undefined}
               >
                 {question.word.pinyin}
               </div>
@@ -406,12 +406,12 @@ export function SiteBlockerOverlay({ settings, words, hostname, onUnlock }: Prop
                         fontSize: '16px',
                         color: colors.pinyinText,
                         marginTop: '8px',
-                        filter: pinyinRevealed ? 'none' : 'blur(6px)',
-                        cursor: pinyinRevealed ? 'default' : 'pointer',
+                        filter: (pinyinRevealed || flipped) ? 'none' : 'blur(6px)',
+                        cursor: (pinyinRevealed || flipped) ? 'default' : 'pointer',
                         transition: 'filter 0.2s',
                         userSelect: 'none',
                       }}
-                      title={pinyinRevealed ? undefined : 'Klik untuk melihat pinyin'}
+                      title={(!pinyinRevealed && !flipped) ? 'Klik untuk melihat pinyin' : undefined}
                     >
                       {question.word.pinyin}
                     </div>

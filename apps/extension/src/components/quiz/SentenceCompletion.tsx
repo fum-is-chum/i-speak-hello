@@ -16,6 +16,7 @@ export function SentenceCompletion({ question, onAnswer, autoSpeak }: SentenceCo
   const [input, setInput] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
+  const [hintRevealed, setHintRevealed] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const { word, sentenceTemplate, sentenceAnswer, sentencePinyin, hint } = question;
   const langInfo = LANGUAGES[word.targetLanguage];
@@ -66,14 +67,21 @@ export function SentenceCompletion({ question, onAnswer, autoSpeak }: SentenceCo
           ))}
         </p>
 
-        {/* Show sentence pinyin after submission (for zh words) */}
-        {submitted && sentencePinyin && word.targetLanguage === 'zh' && (
-          <PinyinDisplay pinyin={sentencePinyin} className="mt-2 text-base" />
+        {/* Sentence pinyin (Mandarin only) — blurred by default, auto-reveals after submission */}
+        {sentencePinyin && word.targetLanguage === 'zh' && (
+          <PinyinDisplay pinyin={sentencePinyin} className="mt-2 text-base" hidden forceReveal={submitted} />
         )}
 
-        {/* Hint (Indonesian translation) */}
+        {/* Hint (Indonesian translation) — blurred by default, click to reveal */}
         {hint && (
-          <p className="mt-3 text-sm text-gray-400">
+          <p
+            className={cn(
+              'mt-3 text-sm text-gray-400 cursor-pointer select-none transition-all duration-200',
+              !hintRevealed && !submitted && 'blur-sm hover:blur-[3px]'
+            )}
+            onClick={() => !hintRevealed && setHintRevealed(true)}
+            title={!hintRevealed && !submitted ? 'Klik untuk melihat petunjuk' : undefined}
+          >
             💡 Petunjuk: {hint}
           </p>
         )}

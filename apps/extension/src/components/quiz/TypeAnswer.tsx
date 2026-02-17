@@ -17,8 +17,9 @@ export function TypeAnswer({ question, onAnswer, autoSpeak }: TypeAnswerProps) {
   const [input, setInput] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
+  const [hintRevealed, setHintRevealed] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const { word } = question;
+  const { word, hint, sentencePinyin } = question;
   const langInfo = LANGUAGES[word.targetLanguage];
 
   useEffect(() => {
@@ -52,9 +53,28 @@ export function TypeAnswer({ question, onAnswer, autoSpeak }: TypeAnswerProps) {
         <span className="text-sm text-gray-400">{langInfo.flag} Tulis artinya dalam Bahasa Indonesia</span>
         <p className="mt-2 text-4xl font-bold text-gray-900 dark:text-white">{word.original}</p>
         {word.pinyin && (
-          <PinyinDisplay pinyin={word.pinyin} className="mt-2 text-lg" hidden />
+          <PinyinDisplay pinyin={word.pinyin} className="mt-2 text-lg" hidden forceReveal={submitted} />
         )}
         <SpeakButton text={word.original} language={word.targetLanguage} className="mt-3" />
+
+        {/* Indonesian translation hint — blurred by default, with sentence pinyin */}
+        {hint && (
+          <div
+            className={cn(
+              'mt-3 cursor-pointer select-none transition-all duration-200',
+              !hintRevealed && !submitted && 'blur-sm hover:blur-[3px]'
+            )}
+            onClick={() => !hintRevealed && setHintRevealed(true)}
+            title={!hintRevealed && !submitted ? 'Klik untuk melihat petunjuk' : undefined}
+          >
+            {sentencePinyin && word.targetLanguage === 'zh' && (
+              <PinyinDisplay pinyin={sentencePinyin} className="text-sm mb-1" />
+            )}
+            <p className="text-sm text-gray-400">
+              💡 Petunjuk: {hint}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Input */}

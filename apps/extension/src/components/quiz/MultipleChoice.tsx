@@ -15,7 +15,8 @@ interface MultipleChoiceProps {
 export function MultipleChoice({ question, onAnswer, autoSpeak }: MultipleChoiceProps) {
   const [selected, setSelected] = useState<string | null>(null);
   const [answered, setAnswered] = useState(false);
-  const { word, options = [] } = question;
+  const [hintRevealed, setHintRevealed] = useState(false);
+  const { word, options = [], hint, sentencePinyin } = question;
   const langInfo = LANGUAGES[word.targetLanguage];
 
   // Auto-speak on mount
@@ -45,9 +46,28 @@ export function MultipleChoice({ question, onAnswer, autoSpeak }: MultipleChoice
         <span className="text-sm text-gray-400">{langInfo.flag} Apa arti kata ini?</span>
         <p className="mt-2 text-4xl font-bold text-gray-900 dark:text-white">{word.original}</p>
         {word.pinyin && (
-          <PinyinDisplay pinyin={word.pinyin} className="mt-2 text-lg" hidden />
+          <PinyinDisplay pinyin={word.pinyin} className="mt-2 text-lg" hidden forceReveal={answered} />
         )}
         <SpeakButton text={word.original} language={word.targetLanguage} className="mt-3" />
+
+        {/* Sentence pinyin hint (Mandarin only) — blurred by default */}
+        {sentencePinyin && word.targetLanguage === 'zh' && (
+          <PinyinDisplay pinyin={sentencePinyin} className="mt-3 text-sm" hidden forceReveal={answered} />
+        )}
+
+        {/* Indonesian translation hint — blurred by default */}
+        {hint && (
+          <p
+            className={cn(
+              'mt-2 text-sm text-gray-400 cursor-pointer select-none transition-all duration-200',
+              !hintRevealed && !answered && 'blur-sm hover:blur-[3px]'
+            )}
+            onClick={() => !hintRevealed && setHintRevealed(true)}
+            title={!hintRevealed && !answered ? 'Klik untuk melihat petunjuk' : undefined}
+          >
+            💡 Petunjuk: {hint}
+          </p>
+        )}
       </div>
 
       {/* Options */}

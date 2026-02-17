@@ -116,6 +116,24 @@ function buildQuestion(word: Word, quizType: QuizType, allWords: Word[]): QuizQu
     // Insert correct answer at random position
     const options = shuffle([word.translation, ...wrongOptions]);
     question.options = options;
+
+    // Add sentence hint for context
+    if (word.sentences.length > 0) {
+      const sentence = word.sentences[Math.floor(Math.random() * word.sentences.length)];
+      question.hint = sentence.translation;
+      if (sentence.pinyin) {
+        question.sentencePinyin = sentence.pinyin;
+      }
+    }
+  }
+
+  // For typing quiz, add sentence hint for context
+  if (quizType === 'typing' && word.sentences.length > 0) {
+    const sentence = word.sentences[Math.floor(Math.random() * word.sentences.length)];
+    question.hint = sentence.translation;
+    if (sentence.pinyin) {
+      question.sentencePinyin = sentence.pinyin;
+    }
   }
 
   if (quizType === 'sentence' && word.sentences.length > 0) {

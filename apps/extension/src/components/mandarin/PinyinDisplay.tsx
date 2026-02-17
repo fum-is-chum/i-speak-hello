@@ -7,12 +7,14 @@ interface PinyinDisplayProps {
   className?: string;
   /** When true, pinyin is blurred and requires a click to reveal */
   hidden?: boolean;
+  /** When true, force-reveals pinyin regardless of hidden state (e.g. after answering) */
+  forceReveal?: boolean;
 }
 
-export function PinyinDisplay({ pinyin, className, hidden = false }: PinyinDisplayProps) {
+export function PinyinDisplay({ pinyin, className, hidden = false, forceReveal = false }: PinyinDisplayProps) {
   const [revealed, setRevealed] = useState(false);
   const syllables = splitPinyin(pinyin);
-  const isBlurred = hidden && !revealed;
+  const isBlurred = hidden && !revealed && !forceReveal;
 
   return (
     <span

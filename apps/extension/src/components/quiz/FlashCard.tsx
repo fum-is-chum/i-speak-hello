@@ -47,7 +47,7 @@ export function FlashCard({ question, onAnswer, autoSpeak }: FlashCardProps) {
             <span className="mb-2 text-sm text-gray-400">{langInfo.flag} {langInfo.nativeName}</span>
             <p className="text-4xl font-bold text-gray-900 dark:text-white">{word.original}</p>
             {word.pinyin && (
-              <PinyinDisplay pinyin={word.pinyin} className="mt-2 text-lg" hidden />
+              <PinyinDisplay pinyin={word.pinyin} className="mt-2 text-lg" hidden forceReveal={flipped} />
             )}
             <SpeakButton text={word.original} language={word.targetLanguage} className="mt-4" />
             <p className="mt-4 text-sm text-gray-400">Klik untuk membuka jawaban</p>
