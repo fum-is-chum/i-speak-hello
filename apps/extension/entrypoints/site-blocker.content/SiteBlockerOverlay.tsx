@@ -92,6 +92,7 @@ export function SiteBlockerOverlay({ settings, words, hostname, onUnlock }: Prop
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [flipped, setFlipped] = useState(false);
+  const [pinyinRevealed, setPinyinRevealed] = useState(false);
 
   // Color palette based on dark/light mode
   const colors = useMemo(() => isDark ? {
@@ -100,6 +101,7 @@ export function SiteBlockerOverlay({ settings, words, hostname, onUnlock }: Prop
     cardText: '#f9fafb',
     subtitleText: '#9ca3af',
     accentText: '#818cf8',
+    pinyinText: '#a5b4fc',
     dotInactive: '#374151',
     dotActive: '#22c55e',
     dotCurrent: '#6366f1',
@@ -127,6 +129,7 @@ export function SiteBlockerOverlay({ settings, words, hostname, onUnlock }: Prop
     cardText: '#111827',
     subtitleText: '#9ca3af',
     accentText: '#6366f1',
+    pinyinText: '#6366f1',
     dotInactive: '#e5e7eb',
     dotActive: '#22c55e',
     dotCurrent: '#6366f1',
@@ -234,6 +237,7 @@ export function SiteBlockerOverlay({ settings, words, hostname, onUnlock }: Prop
         setCurrentIdx(prev => prev + 1);
         setSelectedAnswer(null);
         setShowResult(false);
+        setPinyinRevealed(false);
       } else {
         onUnlock();
       }
@@ -252,6 +256,7 @@ export function SiteBlockerOverlay({ settings, words, hostname, onUnlock }: Prop
     } else if (currentIdx + 1 < questions.length) {
       setCurrentIdx(prev => prev + 1);
       setFlipped(false);
+      setPinyinRevealed(false);
     } else {
       onUnlock();
     }
@@ -317,7 +322,19 @@ export function SiteBlockerOverlay({ settings, words, hostname, onUnlock }: Prop
               {question.word.original}
             </div>
             {question.word.pinyin && (
-              <div style={{ fontSize: '16px', color: colors.accentText, marginBottom: '20px' }}>
+              <div
+                onClick={() => setPinyinRevealed(true)}
+                style={{
+                  fontSize: '16px',
+                  color: colors.pinyinText,
+                  marginBottom: '20px',
+                  filter: pinyinRevealed ? 'none' : 'blur(6px)',
+                  cursor: pinyinRevealed ? 'default' : 'pointer',
+                  transition: 'filter 0.2s',
+                  userSelect: 'none',
+                }}
+                title={pinyinRevealed ? undefined : 'Klik untuk melihat pinyin'}
+              >
                 {question.word.pinyin}
               </div>
             )}
@@ -383,7 +400,21 @@ export function SiteBlockerOverlay({ settings, words, hostname, onUnlock }: Prop
                 <>
                   <div style={{ fontSize: '36px', fontWeight: 700 }}>{question.word.original}</div>
                   {question.word.pinyin && (
-                    <div style={{ fontSize: '16px', color: colors.accentText, marginTop: '8px' }}>{question.word.pinyin}</div>
+                    <div
+                      onClick={(e) => { e.stopPropagation(); setPinyinRevealed(true); }}
+                      style={{
+                        fontSize: '16px',
+                        color: colors.pinyinText,
+                        marginTop: '8px',
+                        filter: pinyinRevealed ? 'none' : 'blur(6px)',
+                        cursor: pinyinRevealed ? 'default' : 'pointer',
+                        transition: 'filter 0.2s',
+                        userSelect: 'none',
+                      }}
+                      title={pinyinRevealed ? undefined : 'Klik untuk melihat pinyin'}
+                    >
+                      {question.word.pinyin}
+                    </div>
                   )}
                   <div style={{ fontSize: '13px', color: colors.flashcardHint, marginTop: '12px' }}>
                     Klik untuk melihat jawaban

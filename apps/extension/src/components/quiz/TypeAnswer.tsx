@@ -52,7 +52,7 @@ export function TypeAnswer({ question, onAnswer, autoSpeak }: TypeAnswerProps) {
         <span className="text-sm text-gray-400">{langInfo.flag} Tulis artinya dalam Bahasa Indonesia</span>
         <p className="mt-2 text-4xl font-bold text-gray-900 dark:text-white">{word.original}</p>
         {word.pinyin && (
-          <PinyinDisplay pinyin={word.pinyin} className="mt-2 text-lg" />
+          <PinyinDisplay pinyin={word.pinyin} className="mt-2 text-lg" hidden />
         )}
         <SpeakButton text={word.original} language={word.targetLanguage} className="mt-3" />
       </div>
