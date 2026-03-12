@@ -1,11 +1,13 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import type { QuizQuestion } from '@i-speak-hello/shared';
 import { LANGUAGES } from '@i-speak-hello/shared';
 import { PinyinDisplay } from '../mandarin/PinyinDisplay';
 import { SpeakButton } from './SpeakButton';
+import { HintReveal } from './HintReveal';
+import { QuizInput } from './QuizInput';
+import { ResultFeedback } from './ResultFeedback';
 import { isAnswerClose } from '../../lib/quiz-engine';
-import { speak } from '../../lib/audio';
-import { cn } from '../../lib/cn';
+import { useAutoSpeak } from '../../hooks/useAutoSpeak';
 
 interface TypeAnswerProps {
   question: QuizQuestion;
@@ -17,26 +19,12 @@ export function TypeAnswer({ question, onAnswer, autoSpeak }: TypeAnswerProps) {
   const [input, setInput] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
-  const [hintRevealed, setHintRevealed] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
   const { word, hint, sentencePinyin } = question;
   const langInfo = LANGUAGES[word.targetLanguage];
 
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
+  useAutoSpeak(word.original, word.targetLanguage, autoSpeak);
 
-  // Auto-speak on mount
-  useEffect(() => {
-    if (autoSpeak) {
-      speak(word.original, word.targetLanguage);
-    }
-  }, [autoSpeak, word.original, word.targetLanguage]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || submitted) return;
-
+  const handleSubmit = () => {
     const correct = isAnswerClose(input, word.translation, word.acceptedAnswers);
     setIsCorrect(correct);
     setSubmitted(true);
@@ -57,78 +45,38 @@ export function TypeAnswer({ question, onAnswer, autoSpeak }: TypeAnswerProps) {
         )}
         <SpeakButton text={word.original} language={word.targetLanguage} className="mt-3" />
 
-        {/* Indonesian translation hint — blurred by default, with sentence pinyin */}
-        {hint && (
-          <div
-            className={cn(
-              'mt-3 cursor-pointer select-none transition-all duration-200',
-              !hintRevealed && !submitted && 'blur-sm hover:blur-[3px]'
-            )}
-            onClick={() => !hintRevealed && setHintRevealed(true)}
-            title={!hintRevealed && !submitted ? 'Klik untuk melihat petunjuk' : undefined}
-          >
+        {/* Sentence pinyin + Indonesian hint — blurred by default */}
+        {(sentencePinyin || hint) && (
+          <HintReveal forceReveal={submitted} className="mt-3">
             {sentencePinyin && word.targetLanguage === 'zh' && (
               <PinyinDisplay pinyin={sentencePinyin} className="text-sm mb-1" />
             )}
-            <p className="text-sm text-gray-400">
-              💡 Petunjuk: {hint}
-            </p>
-          </div>
+            {hint && (
+              <p className="text-sm text-gray-400">
+                💡 Petunjuk: {hint}
+              </p>
+            )}
+          </HintReveal>
         )}
       </div>
 
       {/* Input */}
-      <form onSubmit={handleSubmit} className="w-full max-w-md">
-        <div className="relative">
-          <input
-            ref={inputRef}
-            type="text"
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            disabled={submitted}
-            placeholder="Ketik jawaban di sini..."
-            className={cn(
-              'w-full rounded-xl border-2 px-6 py-4 text-lg outline-none transition-colors',
-              !submitted && 'border-gray-200 focus:border-primary dark:border-gray-600 dark:bg-gray-800 dark:text-white',
-              submitted && isCorrect && 'border-green-500 bg-green-50 dark:bg-green-900/30 dark:text-green-300',
-              submitted && !isCorrect && 'border-red-500 bg-red-50 dark:bg-red-900/30 dark:text-red-300'
-            )}
-          />
-          {!submitted && (
-            <button
-              type="submit"
-              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg bg-primary px-4 py-2 text-sm text-white hover:bg-primary-dark"
-            >
-              Cek
-            </button>
-          )}
-        </div>
+      <QuizInput
+        value={input}
+        onChange={setInput}
+        onSubmit={handleSubmit}
+        submitted={submitted}
+        isCorrect={isCorrect}
+        placeholder="Ketik jawaban di sini..."
+      />
 
-        {submitted && (
-          <div className={cn(
-            'mt-3 rounded-lg p-4 text-center',
-            isCorrect
-              ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-              : 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300'
-          )}>
-            {isCorrect ? (
-              <p className="font-medium">✓ Benar! 🎉</p>
-            ) : (
-              <div>
-                <p className="font-medium">✗ Salah</p>
-                <p className="mt-1">
-                  Jawaban yang benar: <strong>{word.translation}</strong>
-                </p>
-                {word.acceptedAnswers && word.acceptedAnswers.length > 0 && (
-                  <p className="mt-1 text-sm opacity-80">
-                    (juga diterima: {word.acceptedAnswers.join(', ')})
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-      </form>
+      {submitted && (
+        <ResultFeedback
+          isCorrect={isCorrect}
+          correctAnswer={word.translation}
+          acceptedAnswers={word.acceptedAnswers}
+        />
+      )}
     </div>
   );
 }

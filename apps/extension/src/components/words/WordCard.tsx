@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { Word } from '@i-speak-hello/shared';
 import { LANGUAGES, getSRSStatus } from '@i-speak-hello/shared';
 import { PinyinDisplay } from '../mandarin/PinyinDisplay';
@@ -7,6 +8,7 @@ import { cn } from '../../lib/cn';
 interface WordCardProps {
   word: Word;
   onDelete?: (id: string) => void;
+  onRefresh?: (word: Word) => Promise<void>;
   isConfirming?: boolean;
   isDeleting?: boolean;
 }
@@ -17,7 +19,8 @@ const STATUS_STYLES = {
   mastered: { label: 'Lancar', color: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' },
 };
 
-export function WordCard({ word, onDelete, isConfirming, isDeleting }: WordCardProps) {
+export function WordCard({ word, onDelete, onRefresh, isConfirming, isDeleting }: WordCardProps) {
+  const [refreshing, setRefreshing] = useState(false);
   const status = getSRSStatus(word);
   const statusStyle = STATUS_STYLES[status];
   const langInfo = LANGUAGES[word.targetLanguage];
@@ -89,29 +92,59 @@ export function WordCard({ word, onDelete, isConfirming, isDeleting }: WordCardP
           </p>
         </div>
 
-        {/* Delete button */}
-        {onDelete && (
-          isConfirming ? (
+        {/* Action buttons */}
+        <div className="ml-2 flex flex-col gap-1">
+          {/* Refresh button */}
+          {onRefresh && (
             <button
-              onClick={() => onDelete(word.id)}
-              className="ml-2 rounded-lg bg-red-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-600 transition-colors animate-pulse"
-              title="Klik lagi untuk hapus"
-            >
-              Hapus?
-            </button>
-          ) : (
-            <button
-              onClick={() => onDelete(word.id)}
-              className="ml-2 rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/30 dark:hover:text-red-400 transition-colors"
-              title="Hapus kata"
+              onClick={async () => {
+                setRefreshing(true);
+                try {
+                  await onRefresh(word);
+                } finally {
+                  setRefreshing(false);
+                }
+              }}
+              disabled={refreshing}
+              className={cn(
+                'rounded p-1 text-gray-400 hover:bg-indigo-50 hover:text-indigo-500 dark:hover:bg-indigo-900/30 dark:hover:text-indigo-400 transition-colors',
+                refreshing && 'animate-spin'
+              )}
+              title="Refresh kalimat AI"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                <path d="M3 3v5h5" />
+                <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+                <path d="M16 16h5v5" />
               </svg>
             </button>
-          )
-        )}
+          )}
+
+          {/* Delete button */}
+          {onDelete && (
+            isConfirming ? (
+              <button
+                onClick={() => onDelete(word.id)}
+                className="rounded-lg bg-red-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-600 transition-colors animate-pulse"
+                title="Klik lagi untuk hapus"
+              >
+                Hapus?
+              </button>
+            ) : (
+              <button
+                onClick={() => onDelete(word.id)}
+                className="rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/30 dark:hover:text-red-400 transition-colors"
+                title="Hapus kata"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                </svg>
+              </button>
+            )
+          )}
+        </div>
       </div>
     </div>
   );

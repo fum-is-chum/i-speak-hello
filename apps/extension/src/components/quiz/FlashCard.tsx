@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { QuizQuestion } from '@i-speak-hello/shared';
 import { LANGUAGES } from '@i-speak-hello/shared';
 import { PinyinDisplay } from '../mandarin/PinyinDisplay';
 import { SpeakButton } from './SpeakButton';
-import { speak } from '../../lib/audio';
+import { useAutoSpeak } from '../../hooks/useAutoSpeak';
 import { cn } from '../../lib/cn';
 
 interface FlashCardProps {
@@ -17,24 +17,19 @@ export function FlashCard({ question, onAnswer, autoSpeak }: FlashCardProps) {
   const { word } = question;
   const langInfo = LANGUAGES[word.targetLanguage];
 
-  // Auto-speak on mount
-  useEffect(() => {
-    if (autoSpeak) {
-      speak(word.original, word.targetLanguage);
-    }
-  }, [autoSpeak, word.original, word.targetLanguage]);
+  useAutoSpeak(word.original, word.targetLanguage, autoSpeak);
 
   return (
     <div className="flex flex-col items-center gap-6">
       {/* Card */}
       <div
         onClick={() => setFlipped(!flipped)}
-        className="perspective-1000 cursor-pointer"
+        className="perspective-1000 w-full max-w-sm cursor-pointer"
         style={{ perspective: '1000px' }}
       >
         <div
           className={cn(
-            'relative h-64 w-96 transition-transform duration-500',
+            'relative h-56 w-full transition-transform duration-500 sm:h-64',
             flipped && '[transform:rotateY(180deg)]'
           )}
           style={{ transformStyle: 'preserve-3d' }}

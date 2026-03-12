@@ -1,58 +1,13 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import type { UserSettings, Word, QuizType } from '@i-speak-hello/shared';
-import { calculateSM2, XP_PER_QUIZ } from '@i-speak-hello/shared';
+import type { UserSettings, Word, QuizQuestion } from '@i-speak-hello/shared';
+import { buildQuizSession } from '../../src/lib/quiz-engine';
+import { recordQuizAnswer } from '../../src/lib/quiz-helpers';
 
 interface Props {
   settings: UserSettings;
   words: Word[];
   hostname: string;
   onUnlock: () => void;
-}
-
-interface MiniQuestion {
-  word: Word;
-  type: 'flashcard' | 'mcq';
-  options?: string[];
-}
-
-function shuffleArray<T>(arr: T[]): T[] {
-  const result = [...arr];
-  for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [result[i], result[j]] = [result[j], result[i]];
-  }
-  return result;
-}
-
-function buildMiniQuiz(words: Word[], count: number): MiniQuestion[] {
-  const now = Date.now();
-  const due = words.filter(w => w.nextReviewAt <= now);
-  const pool = due.length >= count ? due : [...due, ...shuffleArray(words)];
-  const selected = shuffleArray(pool).slice(0, count);
-
-  return selected.map(word => {
-    const useMcq = words.length >= 4;
-    if (useMcq) {
-      let wrong: string[];
-
-      // Use AI distractors if available
-      if (word.distractors && word.distractors.length >= 3) {
-        wrong = word.distractors.slice(0, 3);
-      } else {
-        wrong = shuffleArray(words.filter(w => w.id !== word.id && w.targetLanguage === word.targetLanguage))
-          .slice(0, 3)
-          .map(w => w.translation);
-      }
-
-      while (wrong.length < 3) wrong.push('???');
-      return {
-        word,
-        type: 'mcq' as const,
-        options: shuffleArray([word.translation, ...wrong]),
-      };
-    }
-    return { word, type: 'flashcard' as const };
-  });
 }
 
 /**
@@ -85,7 +40,10 @@ export function SiteBlockerOverlay({ settings, words, hostname, onUnlock }: Prop
   const skipCooldown = settings.siteBlocker.skipCooldownSeconds;
   const isDark = useDarkMode(settings.theme);
 
-  const [questions] = useState(() => buildMiniQuiz(words, questionsNeeded));
+  // Build quiz using the shared quiz engine (only MCQ + flashcard for site blocker)
+  const [questions] = useState<QuizQuestion[]>(() =>
+    buildQuizSession(words, ['mcq', 'flashcard'], questionsNeeded, 0, 0)
+  );
   const [currentIdx, setCurrentIdx] = useState(0);
   const [answered, setAnswered] = useState(0);
   const [skipTimer, setSkipTimer] = useState(skipCooldown);
@@ -169,52 +127,19 @@ export function SiteBlockerOverlay({ settings, words, hostname, onUnlock }: Prop
     return () => clearInterval(interval);
   }, [skipCooldown, skipTimer]);
 
-  const handleCorrectAnswer = useCallback(async (word: Word, quality: number) => {
-    // Update SRS in storage
-    const srs = calculateSM2({
-      quality,
-      repetitions: word.repetitions,
-      easeFactor: word.easeFactor,
-      intervalDays: word.intervalDays,
-    });
-
-    const { words: storedWords = [] } = await chrome.storage.local.get('words');
-    const updated = storedWords.map((w: Word) =>
-      w.id === word.id
-        ? { ...w, ...srs, lastReviewedAt: Date.now(), updatedAt: Date.now() }
-        : w
-    );
-    await chrome.storage.local.set({ words: updated });
-
-    // Record streak activity
-    const xp = XP_PER_QUIZ['mcq'];
-    const { streak } = await chrome.storage.local.get('streak');
-    if (streak) {
-      const todayStr = new Date().toISOString().split('T')[0];
-      if (streak.lastActiveDate === todayStr) {
-        streak.todayReviewed += 1;
-        streak.todayXp += xp;
-        streak.totalXp += xp;
-      } else {
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        const yesterdayStr = yesterday.toISOString().split('T')[0];
-        if (streak.lastActiveDate === yesterdayStr) {
-          streak.currentStreak += 1;
-        } else {
-          streak.currentStreak = 1;
-        }
-        if (streak.currentStreak > streak.longestStreak) {
-          streak.longestStreak = streak.currentStreak;
-        }
-        streak.lastActiveDate = todayStr;
-        streak.todayReviewed = 1;
-        streak.todayXp = xp;
-        streak.totalXp += xp;
-      }
-      await chrome.storage.local.set({ streak });
+  const advanceToNext = useCallback((nextAnswered: number) => {
+    if (nextAnswered >= questionsNeeded) {
+      onUnlock();
+    } else if (currentIdx + 1 < questions.length) {
+      setCurrentIdx(prev => prev + 1);
+      setSelectedAnswer(null);
+      setShowResult(false);
+      setFlipped(false);
+      setPinyinRevealed(false);
+    } else {
+      onUnlock();
     }
-  }, []);
+  }, [currentIdx, questions.length, questionsNeeded, onUnlock]);
 
   const handleMCQSelect = useCallback((option: string) => {
     if (showResult) return;
@@ -223,44 +148,27 @@ export function SiteBlockerOverlay({ settings, words, hostname, onUnlock }: Prop
     setShowResult(true);
 
     const isCorrect = option === q.word.translation;
-    if (isCorrect) {
-      handleCorrectAnswer(q.word, 4);
-    }
+
+    // Use shared helper for SRS + streak (fire-and-forget)
+    recordQuizAnswer(q.word, isCorrect ? 4 : 1, 'mcq');
 
     setTimeout(() => {
       const nextAnswered = answered + 1;
       setAnswered(nextAnswered);
-
-      if (nextAnswered >= questionsNeeded) {
-        onUnlock();
-      } else if (currentIdx + 1 < questions.length) {
-        setCurrentIdx(prev => prev + 1);
-        setSelectedAnswer(null);
-        setShowResult(false);
-        setPinyinRevealed(false);
-      } else {
-        onUnlock();
-      }
+      advanceToNext(nextAnswered);
     }, 1200);
-  }, [showResult, questions, currentIdx, answered, questionsNeeded, onUnlock, handleCorrectAnswer]);
+  }, [showResult, questions, currentIdx, answered, advanceToNext]);
 
   const handleFlashcardRate = useCallback((quality: number) => {
     const q = questions[currentIdx];
-    handleCorrectAnswer(q.word, quality);
+
+    // Use shared helper for SRS + streak (fire-and-forget)
+    recordQuizAnswer(q.word, quality, 'flashcard');
 
     const nextAnswered = answered + 1;
     setAnswered(nextAnswered);
-
-    if (nextAnswered >= questionsNeeded) {
-      onUnlock();
-    } else if (currentIdx + 1 < questions.length) {
-      setCurrentIdx(prev => prev + 1);
-      setFlipped(false);
-      setPinyinRevealed(false);
-    } else {
-      onUnlock();
-    }
-  }, [questions, currentIdx, answered, questionsNeeded, onUnlock, handleCorrectAnswer]);
+    advanceToNext(nextAnswered);
+  }, [questions, currentIdx, answered, advanceToNext]);
 
   const question = questions[currentIdx];
   if (!question) {
@@ -313,7 +221,7 @@ export function SiteBlockerOverlay({ settings, words, hostname, onUnlock }: Prop
         </div>
 
         {/* Question */}
-        {question.type === 'mcq' ? (
+        {question.quizType === 'mcq' ? (
           <div>
             <div style={{ fontSize: '13px', color: colors.subtitleText, marginBottom: '8px' }}>
               {question.word.targetLanguage === 'zh' ? '🇨🇳' : '🇬🇧'} Apa arti kata ini?

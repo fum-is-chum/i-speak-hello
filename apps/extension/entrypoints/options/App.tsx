@@ -367,6 +367,31 @@ export default function App() {
           {settings.openRouterApiKey && (
             <p className="mt-2 text-xs text-green-600 dark:text-green-400">✓ API key tersimpan</p>
           )}
+
+          {/* Sentence refresh interval */}
+          {settings.openRouterApiKey && (
+            <div className="mt-4 border-t border-gray-100 pt-4 dark:border-gray-700">
+              <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-300">
+                Auto-refresh kalimat AI
+              </label>
+              <select
+                value={settings.sentenceRefreshDays ?? 0}
+                onChange={e => {
+                  updateSettings({ sentenceRefreshDays: parseInt(e.target.value) });
+                  showSaved();
+                }}
+                className="rounded-lg border border-gray-200 px-4 py-2 outline-none focus:border-primary dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              >
+                <option value="0">Off</option>
+                <option value="7">Setiap 7 hari</option>
+                <option value="14">Setiap 14 hari</option>
+                <option value="30">Setiap 30 hari</option>
+              </select>
+              <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                Otomatis regenerate kalimat contoh & opsi quiz untuk variasi belajar
+              </p>
+            </div>
+          )}
         </section>
 
         {/* Theme */}

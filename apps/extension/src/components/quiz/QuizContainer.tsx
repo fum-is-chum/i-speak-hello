@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import type { QuizQuestion, ReviewLog } from '@i-speak-hello/shared';
-import { calculateSM2, XP_PER_QUIZ } from '@i-speak-hello/shared';
+import type { QuizQuestion } from '@i-speak-hello/shared';
 import { buildQuizSession } from '../../lib/quiz-engine';
-import * as storage from '../../lib/storage';
+import { recordQuizAnswer } from '../../lib/quiz-helpers';
 import { useWordStore } from '../../stores/wordStore';
 import { useStreakStore } from '../../stores/streakStore';
 import { useSettingsStore } from '../../stores/settingsStore';
@@ -12,14 +11,18 @@ import { TypeAnswer } from './TypeAnswer';
 import { SentenceCompletion } from './SentenceCompletion';
 import { QuizResult } from './QuizResult';
 
-export function QuizContainer() {
-  const { words, updateWord } = useWordStore();
-  const { recordReview } = useStreakStore();
+interface QuizContainerProps {
+  onGoToWords?: () => void;
+}
+
+export function QuizContainer({ onGoToWords }: QuizContainerProps = {}) {
+  const { words, loadWords } = useWordStore();
+  const { loadStreak } = useStreakStore();
   const { settings } = useSettingsStore();
 
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [results, setResults] = useState<ReviewLog[]>([]);
+  const [results, setResults] = useState<{ wordId: string; quizType: string; wasCorrect: boolean }[]>([]);
   const [totalXp, setTotalXp] = useState(0);
   const [finished, setFinished] = useState(false);
   const [startTime, setStartTime] = useState(0);
@@ -44,41 +47,15 @@ export function QuizContainer() {
 
     const { word, quizType } = question;
     const responseTimeMs = Date.now() - startTime;
-    const wasCorrect = quality >= 3;
-    const xp = wasCorrect ? XP_PER_QUIZ[quizType] : 0;
 
-    // Update SRS
-    const srsResult = calculateSM2({
-      quality,
-      repetitions: word.repetitions,
-      easeFactor: word.easeFactor,
-      intervalDays: word.intervalDays,
-    });
+    // Use shared helper: SRS update + review log + streak
+    const { xp, wasCorrect } = await recordQuizAnswer(word, quality, quizType, responseTimeMs);
 
-    await updateWord(word.id, {
-      easeFactor: srsResult.easeFactor,
-      intervalDays: srsResult.intervalDays,
-      repetitions: srsResult.repetitions,
-      nextReviewAt: srsResult.nextReviewAt,
-      lastReviewedAt: Date.now(),
-    });
+    // Refresh Zustand stores so UI reflects updated data
+    await loadWords();
+    await loadStreak();
 
-    // Log review
-    const review = await storage.addReview({
-      wordId: word.id,
-      quizType,
-      quality,
-      responseTimeMs,
-      wasCorrect,
-      userAnswer: undefined,
-    });
-
-    // Update streak
-    if (wasCorrect) {
-      await recordReview(xp);
-    }
-
-    setResults(prev => [...prev, review]);
+    setResults(prev => [...prev, { wordId: word.id, quizType, wasCorrect }]);
     setTotalXp(prev => prev + xp);
 
     // Next question or finish
@@ -88,7 +65,7 @@ export function QuizContainer() {
     } else {
       setFinished(true);
     }
-  }, [questions, currentIndex, startTime, updateWord, recordReview]);
+  }, [questions, currentIndex, startTime, loadWords, loadStreak]);
 
   if (questions.length === 0) {
     return (
@@ -100,6 +77,14 @@ export function QuizContainer() {
         <p className="mt-2 text-gray-500 dark:text-gray-400">
           Kembali lagi nanti untuk review selanjutnya.
         </p>
+        {onGoToWords && (
+          <button
+            onClick={onGoToWords}
+            className="mt-6 rounded-lg border-2 border-primary px-6 py-3 font-medium text-primary hover:bg-indigo-50 dark:hover:bg-gray-700 transition-colors"
+          >
+            📚 Lihat Kata Saya
+          </button>
+        )}
       </div>
     );
   }

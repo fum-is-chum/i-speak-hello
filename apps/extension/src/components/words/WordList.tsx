@@ -1,15 +1,16 @@
 import { useState } from 'react';
-import type { TargetLanguage } from '@i-speak-hello/shared';
+import type { Word, TargetLanguage } from '@i-speak-hello/shared';
 import { LANGUAGES } from '@i-speak-hello/shared';
 import { useWordStore } from '../../stores/wordStore';
 import { useSettingsStore } from '../../stores/settingsStore';
+import { enrichWord } from '../../lib/openrouter';
 import { WordCard } from './WordCard';
 import { cn } from '../../lib/cn';
 
 type Filter = 'all' | TargetLanguage;
 
 export function WordList() {
-  const { words, deleteWord, searchWords } = useWordStore();
+  const { words, deleteWord, updateWord, searchWords } = useWordStore();
   const { settings } = useSettingsStore();
   const [filter, setFilter] = useState<Filter>('all');
   const [search, setSearch] = useState('');
@@ -21,6 +22,22 @@ export function WordList() {
     : filter === 'all'
       ? words
       : words.filter(w => w.targetLanguage === filter);
+
+  const handleRefresh = async (word: Word) => {
+    if (!settings.openRouterApiKey) return;
+    const result = await enrichWord(
+      settings.openRouterApiKey,
+      word.original,
+      word.translation,
+      word.targetLanguage,
+    );
+    await updateWord(word.id, {
+      sentences: result.sentences.length > 0 ? result.sentences : word.sentences,
+      distractors: result.distractors.length > 0 ? result.distractors : word.distractors,
+      acceptedAnswers: result.acceptedAnswers.length > 0 ? result.acceptedAnswers : word.acceptedAnswers,
+      lastEnrichedAt: Date.now(),
+    });
+  };
 
   const handleDelete = async (id: string) => {
     if (deleteConfirm === id) {
@@ -92,6 +109,7 @@ export function WordList() {
               key={word.id}
               word={word}
               onDelete={handleDelete}
+              onRefresh={settings.openRouterApiKey ? handleRefresh : undefined}
               isConfirming={deleteConfirm === word.id}
               isDeleting={deleting === word.id}
             />

@@ -93,7 +93,7 @@ export default function App() {
         <main>
           {activeTab === 'quiz' && (
             hasWords ? (
-              <QuizContainer />
+              <QuizContainer onGoToWords={() => setActiveTab('words')} />
             ) : (
               <div className="py-16 text-center">
                 <p className="text-6xl">🎓</p>

@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { QuizQuestion } from '@i-speak-hello/shared';
 import { LANGUAGES } from '@i-speak-hello/shared';
 import { PinyinDisplay } from '../mandarin/PinyinDisplay';
 import { SpeakButton } from './SpeakButton';
-import { speak } from '../../lib/audio';
+import { HintReveal } from './HintReveal';
+import { useAutoSpeak } from '../../hooks/useAutoSpeak';
 import { cn } from '../../lib/cn';
 
 interface MultipleChoiceProps {
@@ -15,16 +16,10 @@ interface MultipleChoiceProps {
 export function MultipleChoice({ question, onAnswer, autoSpeak }: MultipleChoiceProps) {
   const [selected, setSelected] = useState<string | null>(null);
   const [answered, setAnswered] = useState(false);
-  const [hintRevealed, setHintRevealed] = useState(false);
   const { word, options = [], hint, sentencePinyin } = question;
   const langInfo = LANGUAGES[word.targetLanguage];
 
-  // Auto-speak on mount
-  useEffect(() => {
-    if (autoSpeak) {
-      speak(word.original, word.targetLanguage);
-    }
-  }, [autoSpeak, word.original, word.targetLanguage]);
+  useAutoSpeak(word.original, word.targetLanguage, autoSpeak);
 
   const handleSelect = (option: string) => {
     if (answered) return;
@@ -50,23 +45,18 @@ export function MultipleChoice({ question, onAnswer, autoSpeak }: MultipleChoice
         )}
         <SpeakButton text={word.original} language={word.targetLanguage} className="mt-3" />
 
-        {/* Sentence pinyin hint (Mandarin only) — blurred by default */}
-        {sentencePinyin && word.targetLanguage === 'zh' && (
-          <PinyinDisplay pinyin={sentencePinyin} className="mt-3 text-sm" hidden forceReveal={answered} />
-        )}
-
-        {/* Indonesian translation hint — blurred by default */}
-        {hint && (
-          <p
-            className={cn(
-              'mt-2 text-sm text-gray-400 cursor-pointer select-none transition-all duration-200',
-              !hintRevealed && !answered && 'blur-sm hover:blur-[3px]'
+        {/* Sentence pinyin + Indonesian hint — blurred by default */}
+        {(sentencePinyin || hint) && (
+          <HintReveal forceReveal={answered} className="mt-3">
+            {sentencePinyin && word.targetLanguage === 'zh' && (
+              <PinyinDisplay pinyin={sentencePinyin} className="text-sm mb-1" />
             )}
-            onClick={() => !hintRevealed && setHintRevealed(true)}
-            title={!hintRevealed && !answered ? 'Klik untuk melihat petunjuk' : undefined}
-          >
-            💡 Petunjuk: {hint}
-          </p>
+            {hint && (
+              <p className="text-sm text-gray-400">
+                💡 Petunjuk: {hint}
+              </p>
+            )}
+          </HintReveal>
         )}
       </div>
 

@@ -57,6 +57,7 @@ export default defineBackground(() => {
   // ── Alarms ─────────────────────────────────────────
   chrome.alarms.create('update-badge', { periodInMinutes: 5 });
   chrome.alarms.create('auto-backup', { periodInMinutes: 30 });
+  chrome.alarms.create('sentence-refresh', { periodInMinutes: 60 * 6 }); // every 6 hours
 
   // Set up study reminder alarm based on settings
   async function setupReminderAlarm() {
@@ -101,6 +102,61 @@ export default defineBackground(() => {
         console.log('[I Speak Hello] Auto-backup completed');
       } catch (err) {
         console.warn('[I Speak Hello] Auto-backup failed:', err);
+      }
+    }
+
+    if (alarm.name === 'sentence-refresh') {
+      try {
+        const { settings } = await chrome.storage.local.get('settings');
+        const config = settings ?? getDefaultSettings();
+        const refreshDays = config.sentenceRefreshDays ?? 0;
+        const apiKey = config.openRouterApiKey;
+
+        if (refreshDays > 0 && apiKey) {
+          const { enrichWord } = await import('../src/lib/openrouter');
+          const { words = [] } = await chrome.storage.local.get('words');
+          const now = Date.now();
+          const refreshThreshold = now - refreshDays * 24 * 60 * 60 * 1000;
+
+          // Find words that need refreshing: enriched before threshold AND reviewed at least 3 times
+          const candidates = (words as Word[]).filter(w =>
+            w.repetitions >= 3 &&
+            w.sentences.length > 0 &&
+            (w.lastEnrichedAt ?? 0) < refreshThreshold
+          );
+
+          // Process up to 5 words per cycle to respect API limits
+          const batch = candidates.slice(0, 5);
+
+          for (const word of batch) {
+            try {
+              const result = await enrichWord(apiKey, word.original, word.translation, word.targetLanguage);
+
+              // Update word with fresh sentences + distractors
+              const allWords = [...words] as Word[];
+              const idx = allWords.findIndex((w: Word) => w.id === word.id);
+              if (idx !== -1) {
+                allWords[idx] = {
+                  ...allWords[idx],
+                  sentences: result.sentences.length > 0 ? result.sentences : allWords[idx].sentences,
+                  distractors: result.distractors.length > 0 ? result.distractors : allWords[idx].distractors,
+                  acceptedAnswers: result.acceptedAnswers.length > 0 ? result.acceptedAnswers : allWords[idx].acceptedAnswers,
+                  lastEnrichedAt: now,
+                  updatedAt: now,
+                };
+              }
+              await chrome.storage.local.set({ words: allWords });
+            } catch (err) {
+              console.warn(`[I Speak Hello] Failed to refresh word "${word.original}":`, err);
+            }
+          }
+
+          if (batch.length > 0) {
+            console.log(`[I Speak Hello] Refreshed sentences for ${batch.length} words`);
+          }
+        }
+      } catch (err) {
+        console.warn('[I Speak Hello] Sentence refresh failed:', err);
       }
     }
 

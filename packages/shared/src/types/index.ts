@@ -24,6 +24,7 @@ export interface Word {
   repetitions: number;
   nextReviewAt: number; // timestamp
   lastReviewedAt?: number;
+  lastEnrichedAt?: number;     // timestamp of last AI enrichment
   createdAt: number;
   updatedAt: number;
 }
@@ -107,6 +108,7 @@ export interface UserSettings {
   newWordRatio: number;          // 0-100 percentage of new words in session
   reminderEnabled: boolean;
   reminderTime: string;          // HH:MM format
+  sentenceRefreshDays: number;   // 0=off, 7/14/30 days auto-refresh AI sentences
 }
 
 export interface StreakData {
@@ -140,6 +142,7 @@ export function getDefaultSettings(): UserSettings {
     newWordRatio: 20,
     reminderEnabled: false,
     reminderTime: '09:00',
+    sentenceRefreshDays: 0,
     siteBlocker: {
       enabled: false,
       blockedSites: [],

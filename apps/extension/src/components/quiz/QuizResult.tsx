@@ -1,9 +1,16 @@
-import type { ReviewLog, Word } from '@i-speak-hello/shared';
+import { useState } from 'react';
+import type { Word } from '@i-speak-hello/shared';
 import { useStreakStore } from '../../stores/streakStore';
 import { getXpForNextLevel } from '@i-speak-hello/shared';
 
+export interface QuizResultEntry {
+  wordId: string;
+  quizType: string;
+  wasCorrect: boolean;
+}
+
 interface QuizResultProps {
-  results: ReviewLog[];
+  results: QuizResultEntry[];
   totalXp: number;
   words: Word[];
   onRestart: () => void;
@@ -11,9 +18,16 @@ interface QuizResultProps {
 
 export function QuizResult({ results, totalXp, words, onRestart }: QuizResultProps) {
   const { streak, level, totalXp: allTimeXp } = useStreakStore();
+  const [showMistakes, setShowMistakes] = useState(false);
+
   const correctCount = results.filter(r => r.wasCorrect).length;
   const accuracy = results.length > 0 ? Math.round((correctCount / results.length) * 100) : 0;
   const xpProgress = getXpForNextLevel(allTimeXp);
+
+  const mistakes = results.filter(r => !r.wasCorrect);
+  const mistakeWords = mistakes
+    .map(m => words.find(w => w.id === m.wordId))
+    .filter((w): w is Word => !!w);
 
   return (
     <div className="flex flex-col items-center gap-6 py-8">
@@ -40,6 +54,37 @@ export function QuizResult({ results, totalXp, words, onRestart }: QuizResultPro
           <p className="text-xs text-gray-500">XP</p>
         </div>
       </div>
+
+      {/* View Mistakes */}
+      {mistakeWords.length > 0 && (
+        <div className="w-full max-w-sm">
+          <button
+            onClick={() => setShowMistakes(prev => !prev)}
+            className="flex w-full items-center justify-between rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-700 transition-colors hover:bg-red-100 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/50"
+          >
+            <span>📝 Lihat kesalahan ({mistakeWords.length})</span>
+            <span className="text-lg">{showMistakes ? '▲' : '▼'}</span>
+          </button>
+          {showMistakes && (
+            <div className="mt-2 space-y-2">
+              {mistakeWords.map(word => (
+                <div
+                  key={word.id}
+                  className="flex items-center justify-between rounded-lg border border-red-200 bg-white px-4 py-3 dark:border-red-800 dark:bg-gray-800"
+                >
+                  <div>
+                    <p className="font-medium text-gray-900 dark:text-white">{word.original}</p>
+                    {word.pinyin && (
+                      <p className="text-xs text-gray-400">{word.pinyin}</p>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">{word.translation}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Streak & Level */}
       <div className="flex gap-6 text-center">
