@@ -15,9 +15,10 @@ interface QuizResultProps {
   totalXp: number;
   words: Word[];
   onRestart: () => void;
+  onFinish?: () => void;
 }
 
-export function QuizResult({ results, totalXp, words, onRestart }: QuizResultProps) {
+export function QuizResult({ results, totalXp, words, onRestart, onFinish }: QuizResultProps) {
   const { streak, level, totalXp: allTimeXp } = useStreakStore();
   const [showMistakes, setShowMistakes] = useState(false);
 
@@ -162,9 +163,14 @@ export function QuizResult({ results, totalXp, words, onRestart }: QuizResultPro
         >
           Quiz Lagi
         </button>
-        <button className="rounded-2xl border-2 border-stone-200 dark:border-stone-600 px-6 py-4 text-lg font-medium text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors">
-          Selesai
-        </button>
+        {onFinish && (
+          <button
+            onClick={onFinish}
+            className="rounded-2xl border-2 border-stone-200 dark:border-stone-600 px-6 py-4 text-lg font-medium text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
+          >
+            Selesai
+          </button>
+        )}
       </div>
     </div>
   );

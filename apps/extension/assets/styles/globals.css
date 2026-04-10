@@ -155,3 +155,61 @@
   ::-webkit-scrollbar-thumb { background: #a8a29e; border-radius: 3px; }
   .dark ::-webkit-scrollbar-thumb { background: #57534e; }
 }
+
+/* ── Border light running effect (quiz CTA button) ── */
+.border-light-btn {
+  position: relative;
+  border-radius: 1rem;
+  overflow: hidden;
+  background: #0f766e;
+  padding: 3px;
+}
+.border-light-btn::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 240deg,
+    #5eead4 260deg,
+    #99f6e4 280deg,
+    #f0fdfa 290deg,
+    #99f6e4 300deg,
+    #5eead4 320deg,
+    transparent 340deg,
+    transparent 360deg
+  );
+  animation: border-spin 3s linear infinite;
+}
+.border-light-btn .btn-inner {
+  position: relative;
+  z-index: 1;
+  border-radius: calc(1rem - 3px);
+  background: linear-gradient(135deg, #0f766e, #0d9488);
+  width: 100%;
+}
+@keyframes border-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Disabled state */
+.border-light-btn.is-disabled::before {
+  display: none;
+}
+.border-light-btn.is-disabled {
+  background: #d6d3d1;
+  cursor: not-allowed;
+}
+.dark .border-light-btn.is-disabled {
+  background: #44403c;
+}
+.border-light-btn.is-disabled .btn-inner {
+  background: #d6d3d1;
+}
+.dark .border-light-btn.is-disabled .btn-inner {
+  background: #44403c;
+}

@@ -14,9 +14,10 @@ import { cn } from '../../lib/cn';
 
 interface QuizContainerProps {
   onGoToWords?: () => void;
+  onFinish?: () => void;
 }
 
-export function QuizContainer({ onGoToWords }: QuizContainerProps = {}) {
+export function QuizContainer({ onGoToWords, onFinish }: QuizContainerProps = {}) {
   const { words, loadWords } = useWordStore();
   const { loadStreak } = useStreakStore();
   const { settings } = useSettingsStore();
@@ -93,6 +94,7 @@ export function QuizContainer({ onGoToWords }: QuizContainerProps = {}) {
         results={results}
         totalXp={totalXp}
         words={words}
+        onFinish={onFinish}
         onRestart={() => {
           const session = buildQuizSession(
             words,
