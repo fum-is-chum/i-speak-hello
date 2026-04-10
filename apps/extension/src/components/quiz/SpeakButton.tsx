@@ -24,7 +24,7 @@ export function SpeakButton({ text, language, className }: SpeakButtonProps) {
     <button
       onClick={handleClick}
       className={cn(
-        'rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700',
+        'rounded-full p-2 text-stone-400 transition-colors hover:bg-teal-50 hover:text-teal-600 dark:hover:bg-teal-950/30 dark:hover:text-teal-400',
         playing && 'text-primary animate-pulse',
         className
       )}

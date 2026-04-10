@@ -9,10 +9,11 @@ interface QuizInputProps {
   isCorrect: boolean;
   placeholder?: string;
   submitLabel?: string;
+  center?: boolean;
 }
 
 /**
- * Shared quiz text input with submit button.
+ * Shared quiz text input with full-width submit button below.
  * Used by TypeAnswer and SentenceCompletion.
  */
 export function QuizInput({
@@ -22,7 +23,8 @@ export function QuizInput({
   submitted,
   isCorrect,
   placeholder = 'Ketik jawaban di sini...',
-  submitLabel = 'Cek',
+  submitLabel = 'Periksa',
+  center = false,
 }: QuizInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -37,31 +39,30 @@ export function QuizInput({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-md">
-      <div className="relative">
-        <input
-          ref={inputRef}
-          type="text"
-          value={value}
-          onChange={e => onChange(e.target.value)}
-          disabled={submitted}
-          placeholder={placeholder}
-          className={cn(
-            'w-full rounded-xl border-2 px-6 py-4 text-lg outline-none transition-colors',
-            !submitted && 'border-gray-200 focus:border-primary dark:border-gray-600 dark:bg-gray-800 dark:text-white',
-            submitted && isCorrect && 'border-green-500 bg-green-50 dark:bg-green-900/30 dark:text-green-300',
-            submitted && !isCorrect && 'border-red-500 bg-red-50 dark:bg-red-900/30 dark:text-red-300'
-          )}
-        />
-        {!submitted && (
-          <button
-            type="submit"
-            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg bg-primary px-4 py-2 text-sm text-white hover:bg-primary-dark"
-          >
-            {submitLabel}
-          </button>
+    <form onSubmit={handleSubmit} className="w-full">
+      <input
+        ref={inputRef}
+        type="text"
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        disabled={submitted}
+        placeholder={placeholder}
+        className={cn(
+          'w-full rounded-xl border-2 px-5 py-3.5 text-base outline-none transition-all',
+          center && 'text-center font-medium',
+          !submitted && 'border-stone-200 dark:border-stone-600 bg-surface-1 text-stone-900 dark:text-white placeholder-stone-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10',
+          submitted && isCorrect && 'border-green-500 bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-300 font-medium',
+          submitted && !isCorrect && 'border-red-500 bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-300 font-medium line-through'
         )}
-      </div>
+      />
+      {!submitted && (
+        <button
+          type="submit"
+          className="w-full mt-3 rounded-xl bg-primary hover:bg-primary-dark py-3.5 text-base font-semibold text-white shadow-lg shadow-teal-600/25 hover:shadow-xl transition-all"
+        >
+          {submitLabel}
+        </button>
+      )}
     </form>
   );
 }

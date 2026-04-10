@@ -3,29 +3,86 @@
 /* Force Tailwind to generate text-tone-* classes (used dynamically in shared/pinyin.ts) */
 @source inline("text-tone-1 text-tone-2 text-tone-3 text-tone-4 text-tone-5");
 
+/* Force-generate animation utility classes */
+@source inline("animate-float-up animate-scale-in animate-slide-up animate-shake animate-pulse-blank animate-pulse-glow animate-confetti-fall");
+
 /* Use class-based dark mode instead of media query */
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-primary: #6366f1;
-  --color-primary-light: #818cf8;
-  --color-primary-dark: #4f46e5;
-  --color-success: #22c55e;
-  --color-danger: #ef4444;
-  --color-warning: #f59e0b;
+  /* ── Primary: Deep Teal ── */
+  --color-primary: #0f766e;
+  --color-primary-light: #14b8a6;
+  --color-primary-dark: #0d6963;
 
-  /* Pinyin tone colors (light mode) */
+  /* ── Semantic ── */
+  --color-success: #16a34a;
+  --color-danger: #dc2626;
+  --color-warning: #f97316;
+  --color-reward: #ca8a04;
+
+  /* ── Surfaces (light) ── */
+  --color-surface-0: #fafaf9;
+  --color-surface-1: #ffffff;
+  --color-surface-2: #f5f5f4;
+
+  /* ── Pinyin tone colors (light mode) ── */
   --color-tone-1: #ef4444;
   --color-tone-2: #f97316;
   --color-tone-3: #22c55e;
   --color-tone-4: #3b82f6;
   --color-tone-5: #9ca3af;
 
+  /* ── Typography ── */
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+
+  /* ── Animations ── */
+  --animate-float-up: float-up 1s ease-out forwards;
+  --animate-scale-in: scale-in 0.4s ease-out forwards;
+  --animate-slide-up: slide-up 0.4s ease-out forwards;
+  --animate-shake: shake 0.4s ease-out;
+  --animate-pulse-blank: pulse-blank 2s ease-in-out infinite;
+  --animate-pulse-glow: pulse-glow 2s ease-in-out infinite;
+  --animate-confetti-fall: confetti-fall 2.5s ease-in forwards;
+
+  @keyframes float-up {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-40px); }
+  }
+  @keyframes scale-in {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-4px); }
+    40%, 80% { transform: translateX(4px); }
+  }
+  @keyframes pulse-blank {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.3); }
+    50% { box-shadow: 0 0 0 8px transparent; }
+  }
+  @keyframes confetti-fall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(400px) rotate(720deg); opacity: 0; }
+  }
 }
 
-/* Softer pinyin tone colors for dark mode */
+/* ── Dark mode overrides ── */
 .dark {
+  --color-surface-0: #0c0a09;
+  --color-surface-1: #1c1917;
+  --color-surface-2: #292524;
+
+  /* Softer pinyin tone colors for dark mode */
   --color-tone-1: #fca5a5;
   --color-tone-2: #fdba74;
   --color-tone-3: #86efac;
@@ -42,7 +99,59 @@
 
   body {
     font-family: var(--font-sans);
+    background-color: var(--color-surface-0);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Create stacking context so z-index:-1 orbs render above background, not behind it */
+    isolation: isolate;
   }
+
+  /* Ambient background orbs */
+  body::before,
+  body::after {
+    content: '';
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(120px);
+    pointer-events: none;
+    z-index: -1;
+  }
+  body::before {
+    top: -10%;
+    right: -5%;
+    width: 600px;
+    height: 600px;
+    background: #0d9488;
+    opacity: 0.15;
+  }
+  body::after {
+    bottom: -10%;
+    left: -5%;
+    width: 500px;
+    height: 500px;
+    background: #14b8a6;
+    opacity: 0.12;
+  }
+  .dark body::before { opacity: 0.08; }
+  .dark body::after  { opacity: 0.06; }
+
+  /* Focus-visible */
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  /* Selection */
+  ::selection {
+    background: rgba(13, 148, 136, 0.25);
+  }
+
+  /* Smooth scrolling */
+  html { scroll-behavior: smooth; }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #a8a29e; border-radius: 3px; }
+  .dark ::-webkit-scrollbar-thumb { background: #57534e; }
 }

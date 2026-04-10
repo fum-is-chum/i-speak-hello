@@ -4,8 +4,48 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>I Speak Hello</title>
+    <style>
+      html {
+        width: 380px;
+        max-width: 380px;
+        overflow: hidden;
+        background-color: #fafaf9;
+      }
+      body {
+        width: 380px;
+        max-width: 380px;
+        min-height: 200px;
+        max-height: 600px;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+        overflow-y: auto;
+        scrollbar-width: none; /* Firefox */
+        background-color: #fafaf9;
+      }
+      body::-webkit-scrollbar {
+        display: none; /* Chrome/Brave */
+      }
+      #root {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        background-color: #fafaf9;
+      }
+      /* Disable ambient orbs in popup */
+      body::before, body::after {
+        display: none !important;
+      }
+      /* Dark mode */
+      @media (prefers-color-scheme: dark) {
+        html, body, #root { background-color: #0c0a09; }
+      }
+      html.dark, html.dark body, html.dark #root {
+        background-color: #0c0a09;
+      }
+    </style>
   </head>
-  <body style="width: 380px; min-height: 200px; max-height: 600px; overflow-y: auto;">
+  <body>
     <div id="root"></div>
     <script type="module" src="./main.tsx"></script>
   </body>

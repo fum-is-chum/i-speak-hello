@@ -27,8 +27,6 @@ export function MultipleChoice({ question, onAnswer, autoSpeak }: MultipleChoice
     setAnswered(true);
 
     const isCorrect = option === word.translation;
-
-    // Auto-proceed after delay
     setTimeout(() => {
       onAnswer(isCorrect ? 4 : 1);
     }, 1500);
@@ -36,23 +34,22 @@ export function MultipleChoice({ question, onAnswer, autoSpeak }: MultipleChoice
 
   return (
     <div className="flex flex-col items-center gap-6">
-      {/* Question */}
-      <div className="rounded-2xl bg-white p-8 text-center shadow-lg dark:bg-gray-800">
-        <span className="text-sm text-gray-400">{langInfo.flag} Apa arti kata ini?</span>
-        <p className="mt-2 text-4xl font-bold text-gray-900 dark:text-white">{word.original}</p>
+      {/* Question Card */}
+      <div className="w-full rounded-2xl bg-surface-1 ring-1 ring-stone-900/5 dark:ring-white/5 p-6 sm:p-8 text-center shadow-xl animate-scale-in">
+        <span className="text-xs text-stone-400">{langInfo.flag} Apa arti kata ini?</span>
+        <p className="mt-2 text-4xl font-bold tracking-tight text-stone-900 dark:text-white">{word.original}</p>
         {word.pinyin && (
           <PinyinDisplay pinyin={word.pinyin} className="mt-2 text-lg" hidden forceReveal={answered} />
         )}
-        <SpeakButton text={word.original} language={word.targetLanguage} className="mt-3" />
+        <SpeakButton text={word.original} language={word.targetLanguage} className="mt-4" />
 
-        {/* Sentence pinyin + Indonesian hint — blurred by default */}
         {(sentencePinyin || hint) && (
           <HintReveal forceReveal={answered} className="mt-3">
             {sentencePinyin && word.targetLanguage === 'zh' && (
               <PinyinDisplay pinyin={sentencePinyin} className="text-sm mb-1" />
             )}
             {hint && (
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-stone-400">
                 💡 Petunjuk: {hint}
               </p>
             )}
@@ -61,21 +58,11 @@ export function MultipleChoice({ question, onAnswer, autoSpeak }: MultipleChoice
       </div>
 
       {/* Options */}
-      <div className="grid w-full max-w-md grid-cols-1 gap-3">
+      <div className="w-full space-y-3">
         {options.map((option, i) => {
           const isCorrect = option === word.translation;
           const isSelected = option === selected;
-
-          let style = 'border-gray-200 bg-white hover:border-primary hover:bg-indigo-50 dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-indigo-900/30 dark:hover:border-indigo-500';
-          if (answered) {
-            if (isCorrect) {
-              style = 'border-green-500 bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300 dark:border-green-500';
-            } else if (isSelected && !isCorrect) {
-              style = 'border-red-500 bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300 dark:border-red-500';
-            } else {
-              style = 'border-gray-200 bg-gray-50 opacity-50 dark:border-gray-700 dark:bg-gray-800';
-            }
-          }
+          const letter = String.fromCharCode(65 + i);
 
           return (
             <button
@@ -83,14 +70,46 @@ export function MultipleChoice({ question, onAnswer, autoSpeak }: MultipleChoice
               onClick={() => handleSelect(option)}
               disabled={answered}
               className={cn(
-                'rounded-xl border-2 px-6 py-4 text-left text-lg font-medium transition-all dark:text-gray-200',
-                style
+                'w-full flex items-center gap-3 rounded-xl border-2 px-5 py-3.5 text-left transition-all',
+                // Default
+                !answered && 'border-stone-200 dark:border-stone-600 hover:border-teal-400 dark:hover:border-teal-500',
+                // Correct
+                answered && isCorrect && 'border-green-500 bg-green-50 dark:bg-green-950/20 shadow-lg shadow-green-500/10 scale-[1.02]',
+                // Wrong selected
+                answered && isSelected && !isCorrect && 'border-red-500 bg-red-50 dark:bg-red-950/20 animate-shake',
+                // Other (not selected, not correct)
+                answered && !isCorrect && !isSelected && 'border-stone-200 dark:border-stone-700 opacity-50',
               )}
             >
-              <span className="mr-3 text-gray-400">{String.fromCharCode(65 + i)}.</span>
-              {option}
-              {answered && isCorrect && <span className="ml-2">✓</span>}
-              {answered && isSelected && !isCorrect && <span className="ml-2">✗</span>}
+              <span className={cn(
+                'inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-colors',
+                answered && isCorrect
+                  ? 'bg-green-600 text-white'
+                  : answered && isSelected && !isCorrect
+                    ? 'bg-red-500 text-white'
+                    : 'bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400',
+              )}>
+                {letter}
+              </span>
+              <span className={cn(
+                'text-base',
+                answered && isCorrect && 'font-medium text-green-700 dark:text-green-300',
+                answered && isSelected && !isCorrect && 'font-medium text-red-700 dark:text-red-300',
+                !answered && 'text-stone-700 dark:text-stone-200',
+                answered && !isCorrect && !isSelected && 'text-stone-500 dark:text-stone-400',
+              )}>
+                {option}
+              </span>
+              {answered && isCorrect && (
+                <svg className="w-5 h-5 ml-auto text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                </svg>
+              )}
+              {answered && isSelected && !isCorrect && (
+                <svg className="w-5 h-5 ml-auto text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              )}
             </button>
           );
         })}

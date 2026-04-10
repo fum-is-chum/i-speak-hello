@@ -28,25 +28,25 @@ export function DailyGoal({ reviewed, goal, className }: DailyGoalProps) {
           <path
             d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
             fill="none"
-            stroke={isDark ? '#374151' : '#e5e7eb'}
+            stroke={isDark ? '#44403c' : '#e7e5e4'}
             strokeWidth="3"
           />
           <path
             d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
             fill="none"
-            stroke={completed ? '#22c55e' : '#6366f1'}
+            stroke={completed ? '#16a34a' : '#0f766e'}
             strokeWidth="3"
             strokeDasharray={`${progress * 100}, 100`}
             strokeLinecap="round"
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-sm font-bold text-gray-700 dark:text-gray-200">
+          <span className="text-sm font-bold text-stone-700 dark:text-stone-200">
             {reviewed}/{goal}
           </span>
         </div>
       </div>
-      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+      <p className="mt-1 text-xs text-stone-500 dark:text-stone-400">
         {completed ? '🎉 Target tercapai!' : 'Target harian'}
       </p>
     </div>

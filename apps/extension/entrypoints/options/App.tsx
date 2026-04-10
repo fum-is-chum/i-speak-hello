@@ -79,21 +79,23 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen">
       <div className="mx-auto max-w-2xl px-4 py-8">
-        <h1 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">
+        {/* Gradient accent stripe */}
+        <div className="h-1 w-20 rounded-full bg-gradient-to-r from-teal-500 to-cyan-500 mb-6" />
+        <h1 className="mb-6 text-2xl font-bold text-stone-900 dark:text-white">
           ⚙️ Pengaturan
         </h1>
 
         {saved && (
-          <div className="mb-4 rounded-lg bg-green-50 px-4 py-2 text-sm text-green-700 dark:bg-green-900/30 dark:text-green-300">
+          <div className="fixed bottom-6 right-6 z-50 rounded-xl bg-green-600 text-white px-4 py-2.5 text-sm font-medium shadow-lg animate-slide-up">
             ✓ Tersimpan
           </div>
         )}
 
         {/* Learning Languages */}
-        <section className="mb-8 rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
-          <h2 className="mb-3 text-lg font-semibold text-gray-800 dark:text-white">
+        <section className="mb-8 rounded-2xl bg-surface-1 ring-1 ring-stone-900/5 dark:ring-white/5 p-6 shadow-sm">
+          <h2 className="mb-3 text-lg font-semibold text-stone-800 dark:text-white">
             Bahasa yang dipelajari
           </h2>
           <div className="flex gap-3">
@@ -105,7 +107,7 @@ export default function App() {
                   'rounded-lg px-4 py-3 text-sm font-medium transition-all',
                   settings.learningLanguages.includes(lang.key)
                     ? 'bg-primary text-white shadow-md'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300'
+                    : 'bg-stone-100 text-stone-600 hover:bg-stone-200 dark:bg-stone-700 dark:text-stone-300'
                 )}
               >
                 {lang.label}
@@ -115,15 +117,15 @@ export default function App() {
         </section>
 
         {/* Quiz Types */}
-        <section className="mb-8 rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
-          <h2 className="mb-3 text-lg font-semibold text-gray-800 dark:text-white">
+        <section className="mb-8 rounded-2xl bg-surface-1 ring-1 ring-stone-900/5 dark:ring-white/5 p-6 shadow-sm">
+          <h2 className="mb-3 text-lg font-semibold text-stone-800 dark:text-white">
             Tipe Quiz
           </h2>
           <div className="space-y-2">
             {ALL_QUIZ_TYPES.map(qt => (
               <label
                 key={qt.key}
-                className="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700"
+                className="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 hover:bg-stone-50 dark:hover:bg-stone-700"
               >
                 <input
                   type="checkbox"
@@ -132,8 +134,8 @@ export default function App() {
                   className="h-4 w-4 rounded accent-primary"
                 />
                 <div>
-                  <p className="font-medium text-gray-700 dark:text-gray-200">{qt.label}</p>
-                  <p className="text-xs text-gray-400">{qt.desc}</p>
+                  <p className="font-medium text-stone-700 dark:text-stone-200">{qt.label}</p>
+                  <p className="text-xs text-stone-400">{qt.desc}</p>
                 </div>
               </label>
             ))}
@@ -141,12 +143,12 @@ export default function App() {
         </section>
 
         {/* Quiz Difficulty Bias */}
-        <section className="mb-8 rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
-          <h2 className="mb-3 text-lg font-semibold text-gray-800 dark:text-white">
+        <section className="mb-8 rounded-2xl bg-surface-1 ring-1 ring-stone-900/5 dark:ring-white/5 p-6 shadow-sm">
+          <h2 className="mb-3 text-lg font-semibold text-stone-800 dark:text-white">
             📊 Tingkat Kesulitan Quiz
           </h2>
           <div className="flex items-center gap-4">
-            <span className="text-xs text-gray-400">Mudah</span>
+            <span className="text-xs text-stone-400">Mudah</span>
             <input
               type="range"
               min="0"
@@ -159,19 +161,19 @@ export default function App() {
               }}
               className="flex-1 accent-primary"
             />
-            <span className="text-xs text-gray-400">Sulit</span>
+            <span className="text-xs text-stone-400">Sulit</span>
             <span className="min-w-[3rem] text-center text-lg font-bold text-primary">
               {settings.difficultyBias}
             </span>
           </div>
-          <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+          <p className="mt-1 text-xs text-stone-400 dark:text-stone-500">
             Rendah = lebih banyak flashcard/pilihan ganda. Tinggi = lebih banyak ketik/kalimat
           </p>
         </section>
 
         {/* New Word Ratio */}
-        <section className="mb-8 rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
-          <h2 className="mb-3 text-lg font-semibold text-gray-800 dark:text-white">
+        <section className="mb-8 rounded-2xl bg-surface-1 ring-1 ring-stone-900/5 dark:ring-white/5 p-6 shadow-sm">
+          <h2 className="mb-3 text-lg font-semibold text-stone-800 dark:text-white">
             📐 Rasio Kata Baru
           </h2>
           <div className="flex items-center gap-4">
@@ -191,14 +193,14 @@ export default function App() {
               {settings.newWordRatio}%
             </span>
           </div>
-          <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+          <p className="mt-1 text-xs text-stone-400 dark:text-stone-500">
             Persentase kata baru dalam setiap sesi quiz (sisanya kata review)
           </p>
         </section>
 
         {/* Daily Goal */}
-        <section className="mb-8 rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
-          <h2 className="mb-3 text-lg font-semibold text-gray-800 dark:text-white">
+        <section className="mb-8 rounded-2xl bg-surface-1 ring-1 ring-stone-900/5 dark:ring-white/5 p-6 shadow-sm">
+          <h2 className="mb-3 text-lg font-semibold text-stone-800 dark:text-white">
             Target harian
           </h2>
           <div className="flex items-center gap-4">
@@ -218,12 +220,12 @@ export default function App() {
               {settings.dailyGoal}
             </span>
           </div>
-          <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">Jumlah kata yang ingin kamu review per hari</p>
+          <p className="mt-1 text-xs text-stone-400 dark:text-stone-500">Jumlah kata yang ingin kamu review per hari</p>
         </section>
 
         {/* Words per session */}
-        <section className="mb-8 rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
-          <h2 className="mb-3 text-lg font-semibold text-gray-800 dark:text-white">
+        <section className="mb-8 rounded-2xl bg-surface-1 ring-1 ring-stone-900/5 dark:ring-white/5 p-6 shadow-sm">
+          <h2 className="mb-3 text-lg font-semibold text-stone-800 dark:text-white">
             Kata per sesi quiz
           </h2>
           <div className="flex items-center gap-4">
@@ -247,8 +249,8 @@ export default function App() {
 
         {/* Mandarin settings */}
         {settings.learningLanguages.includes('zh') && (
-          <section className="mb-8 rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
-            <h2 className="mb-3 text-lg font-semibold text-gray-800 dark:text-white">
+          <section className="mb-8 rounded-2xl bg-surface-1 ring-1 ring-stone-900/5 dark:ring-white/5 p-6 shadow-sm">
+            <h2 className="mb-3 text-lg font-semibold text-stone-800 dark:text-white">
               🇨🇳 Pengaturan Mandarin
             </h2>
             <label className="flex cursor-pointer items-center gap-3">
@@ -261,14 +263,14 @@ export default function App() {
                 }}
                 className="h-4 w-4 rounded accent-primary"
               />
-              <span className="text-gray-700 dark:text-gray-200">Tampilkan pinyin</span>
+              <span className="text-stone-700 dark:text-stone-200">Tampilkan pinyin</span>
             </label>
           </section>
         )}
 
         {/* Audio */}
-        <section className="mb-8 rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
-          <h2 className="mb-3 text-lg font-semibold text-gray-800 dark:text-white">
+        <section className="mb-8 rounded-2xl bg-surface-1 ring-1 ring-stone-900/5 dark:ring-white/5 p-6 shadow-sm">
+          <h2 className="mb-3 text-lg font-semibold text-stone-800 dark:text-white">
             🔊 Audio
           </h2>
           <div className="space-y-3">
@@ -282,7 +284,7 @@ export default function App() {
                 }}
                 className="h-4 w-4 rounded accent-primary"
               />
-              <span className="text-gray-700 dark:text-gray-200">Auto-play pengucapan saat review</span>
+              <span className="text-stone-700 dark:text-stone-200">Auto-play pengucapan saat review</span>
             </label>
             <label className="flex cursor-pointer items-center gap-3">
               <input
@@ -294,14 +296,14 @@ export default function App() {
                 }}
                 className="h-4 w-4 rounded accent-primary"
               />
-              <span className="text-gray-700 dark:text-gray-200">Auto-putar saat quiz muncul</span>
+              <span className="text-stone-700 dark:text-stone-200">Auto-putar saat quiz muncul</span>
             </label>
           </div>
         </section>
 
         {/* Study Reminder */}
-        <section className="mb-8 rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
-          <h2 className="mb-3 text-lg font-semibold text-gray-800 dark:text-white">
+        <section className="mb-8 rounded-2xl bg-surface-1 ring-1 ring-stone-900/5 dark:ring-white/5 p-6 shadow-sm">
+          <h2 className="mb-3 text-lg font-semibold text-stone-800 dark:text-white">
             ⏰ Pengingat Belajar
           </h2>
           <label className="mb-3 flex cursor-pointer items-center gap-3">
@@ -314,11 +316,11 @@ export default function App() {
               }}
               className="h-4 w-4 rounded accent-primary"
             />
-            <span className="text-gray-700 dark:text-gray-200">Aktifkan pengingat harian</span>
+            <span className="text-stone-700 dark:text-stone-200">Aktifkan pengingat harian</span>
           </label>
           {settings.reminderEnabled && (
             <div className="mt-2">
-              <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-300">
+              <label className="mb-1 block text-sm font-medium text-stone-600 dark:text-stone-300">
                 Waktu pengingat
               </label>
               <input
@@ -328,9 +330,9 @@ export default function App() {
                   updateSettings({ reminderTime: e.target.value });
                   showSaved();
                 }}
-                className="rounded-lg border border-gray-200 px-4 py-2 outline-none focus:border-primary dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                className="rounded-lg border border-stone-200 px-4 py-2 outline-none focus:border-primary dark:border-stone-600 dark:bg-stone-700 dark:text-white"
               />
-              <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+              <p className="mt-1 text-xs text-stone-400 dark:text-stone-500">
                 Notifikasi browser akan muncul saat ada kata yang perlu di-review
               </p>
             </div>
@@ -338,11 +340,11 @@ export default function App() {
         </section>
 
         {/* OpenRouter API Key */}
-        <section className="mb-8 rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
-          <h2 className="mb-3 text-lg font-semibold text-gray-800 dark:text-white">
+        <section className="mb-8 rounded-2xl bg-surface-1 ring-1 ring-stone-900/5 dark:ring-white/5 p-6 shadow-sm">
+          <h2 className="mb-3 text-lg font-semibold text-stone-800 dark:text-white">
             🤖 OpenRouter API Key
           </h2>
-          <p className="mb-3 text-sm text-gray-500 dark:text-gray-400">
+          <p className="mb-3 text-sm text-stone-500 dark:text-stone-400">
             Untuk auto-translate, generate contoh kalimat, pinyin, dan opsi quiz saat menambah kata baru.
             Dapatkan API key gratis di{' '}
             <a
@@ -362,7 +364,7 @@ export default function App() {
               showSaved();
             }}
             placeholder="sk-or-v1-..."
-            className="w-full rounded-lg border border-gray-200 px-4 py-2 font-mono text-sm outline-none focus:border-primary dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            className="w-full rounded-lg border border-stone-200 px-4 py-2 font-mono text-sm outline-none focus:border-primary dark:border-stone-600 dark:bg-stone-700 dark:text-white"
           />
           {settings.openRouterApiKey && (
             <p className="mt-2 text-xs text-green-600 dark:text-green-400">✓ API key tersimpan</p>
@@ -370,8 +372,8 @@ export default function App() {
 
           {/* Sentence refresh interval */}
           {settings.openRouterApiKey && (
-            <div className="mt-4 border-t border-gray-100 pt-4 dark:border-gray-700">
-              <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-300">
+            <div className="mt-4 border-t border-stone-100 pt-4 dark:border-stone-700">
+              <label className="mb-1 block text-sm font-medium text-stone-600 dark:text-stone-300">
                 Auto-refresh kalimat AI
               </label>
               <select
@@ -380,14 +382,14 @@ export default function App() {
                   updateSettings({ sentenceRefreshDays: parseInt(e.target.value) });
                   showSaved();
                 }}
-                className="rounded-lg border border-gray-200 px-4 py-2 outline-none focus:border-primary dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                className="rounded-lg border border-stone-200 px-4 py-2 outline-none focus:border-primary dark:border-stone-600 dark:bg-stone-700 dark:text-white"
               >
                 <option value="0">Off</option>
                 <option value="7">Setiap 7 hari</option>
                 <option value="14">Setiap 14 hari</option>
                 <option value="30">Setiap 30 hari</option>
               </select>
-              <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+              <p className="mt-1 text-xs text-stone-400 dark:text-stone-500">
                 Otomatis regenerate kalimat contoh & opsi quiz untuk variasi belajar
               </p>
             </div>
@@ -395,8 +397,8 @@ export default function App() {
         </section>
 
         {/* Theme */}
-        <section className="mb-8 rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
-          <h2 className="mb-3 text-lg font-semibold text-gray-800 dark:text-white">
+        <section className="mb-8 rounded-2xl bg-surface-1 ring-1 ring-stone-900/5 dark:ring-white/5 p-6 shadow-sm">
+          <h2 className="mb-3 text-lg font-semibold text-stone-800 dark:text-white">
             🎨 Tema
           </h2>
           <div className="flex gap-2">
@@ -411,7 +413,7 @@ export default function App() {
                   'rounded-lg px-4 py-2 text-sm font-medium transition-colors',
                   settings.theme === theme
                     ? 'bg-primary text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300'
+                    : 'bg-stone-100 text-stone-600 hover:bg-stone-200 dark:bg-stone-700 dark:text-stone-300'
                 )}
               >
                 {theme === 'light' && '☀️ Terang'}
@@ -423,11 +425,11 @@ export default function App() {
         </section>
 
         {/* Site Quiz */}
-        <section className="mb-8 rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
-          <h2 className="mb-1 text-lg font-semibold text-gray-800 dark:text-white">
+        <section className="mb-8 rounded-2xl bg-surface-1 ring-1 ring-stone-900/5 dark:ring-white/5 p-6 shadow-sm">
+          <h2 className="mb-1 text-lg font-semibold text-stone-800 dark:text-white">
             🧠 Site Quiz
           </h2>
-          <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
+          <p className="mb-4 text-sm text-stone-500 dark:text-stone-400">
             Tampilkan quiz sebelum membuka situs tertentu. Belajar kata baru sambil browsing!
           </p>
 
@@ -443,13 +445,13 @@ export default function App() {
               }}
               className="h-4 w-4 rounded accent-primary"
             />
-            <span className="font-medium text-gray-700 dark:text-gray-200">Aktifkan Site Quiz</span>
+            <span className="font-medium text-stone-700 dark:text-stone-200">Aktifkan Site Quiz</span>
           </label>
 
           {settings.siteBlocker?.enabled && (
             <div className="space-y-4">
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-300">
+                <label className="mb-1 block text-sm font-medium text-stone-600 dark:text-stone-300">
                   Tambah situs
                 </label>
                 <div className="flex gap-2">
@@ -473,7 +475,7 @@ export default function App() {
                       }
                     }}
                     placeholder="contoh: youtube.com"
-                    className="flex-1 rounded-lg border border-gray-200 px-4 py-2 text-sm outline-none focus:border-primary dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                    className="flex-1 rounded-lg border border-stone-200 px-4 py-2 text-sm outline-none focus:border-primary dark:border-stone-600 dark:bg-stone-700 dark:text-white"
                   />
                   <button
                     onClick={() => {
@@ -498,16 +500,16 @@ export default function App() {
 
               {settings.siteBlocker.blockedSites.length > 0 && (
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-300">
+                  <label className="mb-1 block text-sm font-medium text-stone-600 dark:text-stone-300">
                     Situs yang diblokir
                   </label>
                   <div className="space-y-1">
                     {settings.siteBlocker.blockedSites.map(site => (
                       <div
                         key={site}
-                        className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 dark:bg-gray-700"
+                        className="flex items-center justify-between rounded-lg bg-surface-2 px-3 py-2"
                       >
-                        <span className="text-sm text-gray-700 dark:text-gray-200">🌐 {site}</span>
+                        <span className="text-sm text-stone-700 dark:text-stone-200">🌐 {site}</span>
                         <button
                           onClick={() => {
                             updateSettings({
@@ -529,7 +531,7 @@ export default function App() {
               )}
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-300">
+                <label className="mb-1 block text-sm font-medium text-stone-600 dark:text-stone-300">
                   Jumlah pertanyaan untuk membuka situs
                 </label>
                 <div className="flex items-center gap-4">
@@ -557,7 +559,7 @@ export default function App() {
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-300">
+                <label className="mb-1 block text-sm font-medium text-stone-600 dark:text-stone-300">
                   Durasi unlock setelah quiz (menit)
                 </label>
                 <input
@@ -575,15 +577,15 @@ export default function App() {
                     });
                     showSaved();
                   }}
-                  className="w-24 rounded-lg border border-gray-200 px-4 py-2 text-center outline-none focus:border-primary dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  className="w-24 rounded-lg border border-stone-200 px-4 py-2 text-center outline-none focus:border-primary dark:border-stone-600 dark:bg-stone-700 dark:text-white"
                 />
-                <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                <p className="mt-1 text-xs text-stone-400 dark:text-stone-500">
                   Situs akan tetap terbuka selama {settings.siteBlocker.unlockDurationMinutes ?? 30} menit setelah menjawab quiz
                 </p>
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-300">
+                <label className="mb-1 block text-sm font-medium text-stone-600 dark:text-stone-300">
                   Waktu tunggu untuk melewati (detik)
                 </label>
                 <div className="flex items-center gap-4">
@@ -610,7 +612,7 @@ export default function App() {
                       : `${settings.siteBlocker.skipCooldownSeconds}s`}
                   </span>
                 </div>
-                <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                <p className="mt-1 text-xs text-stone-400 dark:text-stone-500">
                   {settings.siteBlocker.skipCooldownSeconds === 0
                     ? 'Tidak bisa melewati — harus menjawab semua pertanyaan'
                     : `Bisa melewati setelah menunggu ${settings.siteBlocker.skipCooldownSeconds} detik`}
@@ -624,11 +626,11 @@ export default function App() {
         <ExcelImportSection />
 
         {/* Backup & Restore */}
-        <section className="mb-8 rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
-          <h2 className="mb-3 text-lg font-semibold text-gray-800 dark:text-white">
+        <section className="mb-8 rounded-2xl bg-surface-1 ring-1 ring-stone-900/5 dark:ring-white/5 p-6 shadow-sm">
+          <h2 className="mb-3 text-lg font-semibold text-stone-800 dark:text-white">
             💾 Backup & Restore
           </h2>
-          <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
+          <p className="mb-4 text-sm text-stone-500 dark:text-stone-400">
             Data otomatis di-backup ke IndexedDB setiap 30 menit. Kamu juga bisa ekspor/impor secara manual.
           </p>
           <div className="flex gap-3">
@@ -640,7 +642,7 @@ export default function App() {
             </button>
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+              className="rounded-lg border border-stone-200 px-4 py-2 text-sm font-medium text-stone-600 hover:bg-stone-50 dark:border-stone-600 dark:text-stone-300 dark:hover:bg-stone-700 transition-colors"
             >
               📤 Impor Data
             </button>
@@ -655,13 +657,13 @@ export default function App() {
           {importStatus && (
             <p className={cn(
               'mt-3 text-sm',
-              importStatus.startsWith('✓') ? 'text-green-600 dark:text-green-400' : importStatus.startsWith('✗') ? 'text-red-500 dark:text-red-400' : 'text-gray-500'
+              importStatus.startsWith('✓') ? 'text-green-600 dark:text-green-400' : importStatus.startsWith('✗') ? 'text-red-500 dark:text-red-400' : 'text-stone-500'
             )}>
               {importStatus}
             </p>
           )}
           {lastBackupTime && (
-            <p className="mt-3 text-xs text-gray-400 dark:text-gray-500">
+            <p className="mt-3 text-xs text-stone-400 dark:text-stone-500">
               Auto-backup terakhir: {new Date(lastBackupTime).toLocaleString('id-ID')}
             </p>
           )}

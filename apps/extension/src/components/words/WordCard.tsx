@@ -13,133 +13,160 @@ interface WordCardProps {
   isDeleting?: boolean;
 }
 
-const STATUS_STYLES = {
-  new: { label: 'Baru', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' },
-  learning: { label: 'Belajar', color: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300' },
-  mastered: { label: 'Lancar', color: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' },
+const BORDER_COLORS = {
+  new: 'border-l-teal-600',
+  learning: 'border-l-amber-500',
+  mastered: 'border-l-green-500',
+};
+
+const RING_COLORS = {
+  new: 'stroke-teal-600',
+  learning: 'stroke-amber-500',
+  mastered: 'stroke-green-500',
 };
 
 export function WordCard({ word, onDelete, onRefresh, isConfirming, isDeleting }: WordCardProps) {
   const [refreshing, setRefreshing] = useState(false);
+  const [showSentences, setShowSentences] = useState(false);
   const status = getSRSStatus(word);
-  const statusStyle = STATUS_STYLES[status];
   const langInfo = LANGUAGES[word.targetLanguage];
-  const nextReview = new Date(word.nextReviewAt);
-  const isDue = word.nextReviewAt <= Date.now();
+  const isDue = word.nextReviewAt <= Date.now() && word.repetitions > 0;
+
+  // SRS ring progress
+  const circumference = 100.5; // 2 * PI * 16
+  let ringProgress = 0;
+  if (status === 'learning') ringProgress = Math.min(word.repetitions / 5, 1);
+  else if (status === 'mastered') ringProgress = 1;
+  const ringOffset = circumference * (1 - ringProgress);
+
+  // Format interval to fit inside the 40px ring
+  let intervalLabel = 'new';
+  if (status !== 'new') {
+    const days = word.intervalDays;
+    if (days >= 365) intervalLabel = `✓`;
+    else if (days >= 30) intervalLabel = `${Math.round(days / 30)}mo`;
+    else intervalLabel = `${days}d`;
+  }
 
   return (
     <div className={cn(
-      'rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-all hover:shadow-md dark:border-gray-700 dark:bg-gray-800',
-      isDeleting && 'opacity-40 pointer-events-none scale-95'
+      'group rounded-2xl bg-surface-1 ring-1 ring-stone-900/5 dark:ring-white/5 shadow-sm border-l-4 p-5 transition-all hover:-translate-y-0.5 hover:shadow-md relative',
+      BORDER_COLORS[status],
+      isDeleting && 'opacity-40 pointer-events-none scale-95',
     )}>
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          {/* Language flag & status */}
-          <div className="mb-2 flex items-center gap-2">
-            <span className="text-sm">{langInfo.flag}</span>
-            <span className={cn('rounded-full px-2 py-0.5 text-xs font-medium', statusStyle.color)}>
-              {statusStyle.label}
-            </span>
-            {isDue && (
-              <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700 dark:bg-red-900/40 dark:text-red-300">
-                Perlu review
-              </span>
-            )}
-          </div>
+      {/* Due indicator */}
+      {isDue && (
+        <div className="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
+      )}
 
-          {/* Word */}
-          <div className="flex items-center gap-2">
-            <p className="text-xl font-bold text-gray-900 dark:text-white">{word.original}</p>
-            <SpeakButton text={word.original} language={word.targetLanguage} />
+      <div className="flex items-start gap-4">
+        {/* SRS Progress Ring */}
+        <div className="shrink-0 relative w-10 h-10">
+          <svg className="w-10 h-10 -rotate-90" viewBox="0 0 40 40">
+            <circle cx="20" cy="20" r="16" fill="none" strokeWidth="3"
+              className="stroke-stone-200 dark:stroke-stone-700" />
+            <circle cx="20" cy="20" r="16" fill="none" strokeWidth="3"
+              className={RING_COLORS[status]}
+              strokeDasharray={circumference}
+              strokeDashoffset={ringOffset}
+              strokeLinecap="round" />
+          </svg>
+          <span className={cn(
+            'absolute inset-0 flex items-center justify-center text-[9px] font-bold',
+            status === 'mastered' ? 'text-green-600 dark:text-green-400' : 'text-stone-500 dark:text-stone-400',
+          )}>
+            {intervalLabel}
+          </span>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-0.5">
+            <p className="text-xl font-bold text-stone-900 dark:text-white">{word.original}</p>
+            <span className="text-xs text-stone-400">{langInfo.flag}</span>
+            <SpeakButton
+              text={word.original}
+              language={word.targetLanguage}
+              className="opacity-0 group-hover:opacity-100 transition-opacity"
+            />
           </div>
 
           {/* Pinyin */}
           {word.pinyin && (
-            <PinyinDisplay pinyin={word.pinyin} className="text-sm" />
+            <PinyinDisplay pinyin={word.pinyin} className="text-sm mb-1" />
           )}
 
           {/* Translation */}
-          <p className="mt-1 text-gray-600 dark:text-gray-300">
-            🇮🇩 {word.translation}
-          </p>
+          <p className="text-base text-stone-500 dark:text-stone-400">{word.translation}</p>
 
-          {/* Sentences */}
+          {/* Collapsible sentences */}
           {word.sentences.length > 0 && (
-            <div className="mt-2 space-y-1">
-              {word.sentences.slice(0, 2).map(s => (
-                <div key={s.id} className="rounded bg-gray-50 px-3 py-1.5 text-sm dark:bg-gray-700">
-                  <p className="text-gray-700 dark:text-gray-200">{s.sentence}</p>
-                  {/* Show sentence pinyin for zh */}
-                  {s.pinyin && (
-                    <p className="text-xs text-indigo-500 dark:text-indigo-300">{s.pinyin}</p>
-                  )}
-                  <p className="text-xs text-gray-400 dark:text-gray-500">{s.translation}</p>
+            <>
+              <button
+                onClick={() => setShowSentences(prev => !prev)}
+                className="mt-2 text-xs text-teal-600 dark:text-teal-400 hover:underline"
+              >
+                {showSentences ? 'Sembunyikan contoh' : `Lihat contoh (${word.sentences.length})`}
+              </button>
+              {showSentences && (
+                <div className="mt-2 space-y-1.5">
+                  {word.sentences.map(s => (
+                    <div key={s.id} className="rounded-lg bg-surface-2 px-3 py-2 text-sm">
+                      <p className="text-stone-700 dark:text-stone-200">{s.sentence}</p>
+                      {s.pinyin && (
+                        <p className="text-xs text-teal-500 dark:text-teal-400">{s.pinyin}</p>
+                      )}
+                      <p className="text-xs text-stone-400">{s.translation}</p>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           )}
 
           {/* Notes */}
           {word.notes && (
-            <p className="mt-2 text-xs italic text-gray-400 dark:text-gray-500">📝 {word.notes}</p>
+            <p className="mt-2 text-xs italic text-stone-400">📝 {word.notes}</p>
           )}
-
-          {/* Next review */}
-          <p className="mt-2 text-xs text-gray-400 dark:text-gray-500">
-            {isDue
-              ? 'Siap untuk review'
-              : `Review berikutnya: ${nextReview.toLocaleDateString('id-ID')}`}
-          </p>
         </div>
 
-        {/* Action buttons */}
-        <div className="ml-2 flex flex-col gap-1">
-          {/* Refresh button */}
+        {/* Action buttons (hover-visible) */}
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           {onRefresh && (
             <button
               onClick={async () => {
                 setRefreshing(true);
-                try {
-                  await onRefresh(word);
-                } finally {
-                  setRefreshing(false);
-                }
+                try { await onRefresh(word); } finally { setRefreshing(false); }
               }}
               disabled={refreshing}
               className={cn(
-                'rounded p-1 text-gray-400 hover:bg-indigo-50 hover:text-indigo-500 dark:hover:bg-indigo-900/30 dark:hover:text-indigo-400 transition-colors',
-                refreshing && 'animate-spin'
+                'rounded-lg p-2 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors',
+                refreshing && 'animate-spin',
               )}
               title="Refresh kalimat AI"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                <path d="M3 3v5h5" />
-                <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
-                <path d="M16 16h5v5" />
+              <svg className="w-4 h-4 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
             </button>
           )}
 
-          {/* Delete button */}
           {onDelete && (
             isConfirming ? (
               <button
                 onClick={() => onDelete(word.id)}
                 className="rounded-lg bg-red-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-600 transition-colors animate-pulse"
-                title="Klik lagi untuk hapus"
               >
                 Hapus?
               </button>
             ) : (
               <button
                 onClick={() => onDelete(word.id)}
-                className="rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/30 dark:hover:text-red-400 transition-colors"
+                className="rounded-lg p-2 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
                 title="Hapus kata"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                <svg className="w-4 h-4 text-stone-400 hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
               </button>
             )

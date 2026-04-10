@@ -5,9 +5,7 @@ import { WordForm } from '../../src/components/words/WordForm';
 import { useWordStore } from '../../src/stores/wordStore';
 import { useSettingsStore } from '../../src/stores/settingsStore';
 import { useStreakStore } from '../../src/stores/streakStore';
-import { StreakCounter } from '../../src/components/gamification/StreakCounter';
-import { XPBar } from '../../src/components/gamification/XPBar';
-import { DailyGoal } from '../../src/components/gamification/DailyGoal';
+import { StatusBar } from '../../src/components/gamification/StatusBar';
 import { cn } from '../../src/lib/cn';
 import { useTheme } from '../../src/hooks/useTheme';
 
@@ -34,84 +32,88 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <p className="text-4xl animate-bounce">🌏</p>
-          <p className="mt-2 text-gray-500">Memuat...</p>
+          <p className="mt-2 text-stone-500">Memuat...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <div className="mx-auto max-w-4xl px-4 py-8">
-        {/* Header with stats */}
-        <header className="mb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                🌏 I Speak Hello
-              </h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Belajar kata baru setiap hari
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
-              <StreakCounter streak={streak} />
-              <DailyGoal reviewed={todayReviewed} goal={settings.dailyGoal} />
-            </div>
+    <div className="flex flex-col min-h-screen">
+      {/* Sticky Top Bar */}
+      <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/80 dark:bg-stone-950/80 border-b border-stone-200/50 dark:border-stone-700/50">
+        <div className="mx-auto max-w-2xl px-6 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-xl">🌏</span>
+            <span className="text-lg font-bold text-stone-900 dark:text-white">I Speak Hello</span>
           </div>
-          <div className="mt-3">
-            <XPBar totalXp={totalXp} level={level} />
-          </div>
-        </header>
+          <StatusBar
+            streak={streak}
+            reviewed={todayReviewed}
+            goal={settings.dailyGoal}
+            level={level}
+          />
+        </div>
+      </header>
 
-        {/* Tab Navigation */}
-        <nav className="mb-6 flex justify-center gap-1 rounded-xl bg-gray-100 p-1 dark:bg-gray-700">
-          {([
-            { key: 'quiz' as Tab, label: `Quiz${dueCount > 0 ? ` (${dueCount})` : ''}`, icon: '🧠' },
-            { key: 'words' as Tab, label: `Kata Saya (${words.length})`, icon: '📚' },
-            { key: 'add' as Tab, label: 'Tambah', icon: '➕' },
-          ]).map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={cn(
-                'rounded-lg px-5 py-2 text-sm font-medium transition-all',
-                activeTab === tab.key
-                  ? 'bg-white text-primary shadow-sm dark:bg-gray-600 dark:text-white'
-                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-300'
-              )}
-            >
-              {tab.icon} {tab.label}
-            </button>
-          ))}
-        </nav>
-
-        {/* Content */}
-        <main>
+      {/* Main Content */}
+      <main className={cn(
+        'flex-1 px-4 sm:px-6 pb-24',
+        activeTab === 'quiz' ? 'flex items-start justify-center pt-6 sm:pt-10' : 'pt-6',
+      )}>
+        <div className={cn(
+          'w-full',
+          activeTab === 'quiz' ? 'max-w-md' : 'max-w-2xl mx-auto',
+        )}>
           {activeTab === 'quiz' && (
             hasWords ? (
               <QuizContainer onGoToWords={() => setActiveTab('words')} />
             ) : (
-              <div className="py-16 text-center">
-                <p className="text-6xl">🎓</p>
-                <h2 className="mt-4 text-2xl font-bold text-gray-800 dark:text-gray-200">
-                  Selamat datang di I Speak Hello!
-                </h2>
-                <p className="mt-2 text-gray-500 dark:text-gray-400 max-w-md mx-auto">
-                  Aplikasi ini membantu kamu menghafal kata-kata baru dalam bahasa yang sedang kamu pelajari.
-                  Tambahkan kata pertamamu atau muat kata bawaan untuk mulai!
+              /* Welcome / Empty State */
+              <div className="text-center">
+                <div className="text-7xl mb-6 animate-scale-in">🌏</div>
+                <h1 className="text-3xl font-extrabold text-stone-900 dark:text-white mb-3 animate-slide-up">
+                  Mulai Perjalanan<br/>Bahasamu
+                </h1>
+                <p className="text-stone-500 dark:text-stone-400 mb-10 animate-slide-up" style={{ animationDelay: '0.1s', opacity: 0 }}>
+                  Belajar kata-kata baru setiap hari dengan metode spaced repetition
                 </p>
-                <div className="mt-6 flex justify-center gap-3">
+
+                {/* Fanned Preview Cards */}
+                <div className="relative h-32 mb-10 flex justify-center items-center animate-slide-up" style={{ animationDelay: '0.2s', opacity: 0 }}>
+                  <div className="absolute w-40 h-24 rounded-2xl bg-surface-1 ring-1 ring-stone-900/5 dark:ring-white/5 shadow-lg flex flex-col items-center justify-center -rotate-6 -translate-x-12 opacity-60">
+                    <p className="text-2xl font-bold text-stone-900 dark:text-white">你好</p>
+                    <p className="text-xs text-stone-400 mt-1">Halo</p>
+                  </div>
+                  <div className="absolute w-40 h-24 rounded-2xl bg-surface-1 ring-1 ring-stone-900/5 dark:ring-white/5 shadow-xl flex flex-col items-center justify-center z-10">
+                    <p className="text-2xl font-bold text-stone-900 dark:text-white">Hello</p>
+                    <p className="text-xs text-stone-400 mt-1">Halo</p>
+                  </div>
+                  <div className="absolute w-40 h-24 rounded-2xl bg-surface-1 ring-1 ring-stone-900/5 dark:ring-white/5 shadow-lg flex flex-col items-center justify-center rotate-6 translate-x-12 opacity-60">
+                    <p className="text-2xl font-bold text-stone-900 dark:text-white">谢谢</p>
+                    <p className="text-xs text-stone-400 mt-1">Terima kasih</p>
+                  </div>
+                </div>
+
+                {/* CTAs */}
+                <div className="space-y-3 animate-slide-up" style={{ animationDelay: '0.3s', opacity: 0 }}>
                   <button
                     onClick={() => setActiveTab('add')}
-                    className="rounded-lg bg-primary px-6 py-3 font-medium text-white hover:bg-primary-dark transition-colors"
                     disabled={!!seedingStatus}
+                    className="w-full rounded-2xl bg-primary hover:bg-primary-dark py-4 text-lg font-semibold text-white shadow-lg shadow-teal-600/25 hover:shadow-xl transition-all"
                   >
-                    ➕ Tambah Kata Sendiri
+                    Tambah Kata Sendiri
                   </button>
+
+                  <div className="flex items-center gap-3 text-stone-400">
+                    <div className="flex-1 h-px bg-stone-200 dark:bg-stone-700" />
+                    <span className="text-xs">atau</span>
+                    <div className="flex-1 h-px bg-stone-200 dark:bg-stone-700" />
+                  </div>
+
                   <button
                     onClick={async () => {
                       setSeedingStatus('Memuat kata...');
@@ -119,7 +121,6 @@ export default function App() {
                       const { addWord, updateWord, addSentences } = useWordStore.getState();
                       const { settings: currentSettings } = useSettingsStore.getState();
 
-                      // Add all seed words first
                       const addedWords = [];
                       for (const input of SEED_WORDS) {
                         const w = await addWord(input);
@@ -127,7 +128,6 @@ export default function App() {
                       }
                       await chrome.storage.local.set({ seeded: true });
 
-                      // AI enrichment if API key is configured
                       if (currentSettings.openRouterApiKey) {
                         setSeedingStatus('AI sedang generate pinyin + kalimat + opsi quiz...');
                         try {
@@ -163,29 +163,56 @@ export default function App() {
                     }}
                     disabled={!!seedingStatus}
                     className={cn(
-                      'rounded-lg border-2 border-primary px-6 py-3 font-medium transition-colors',
+                      'w-full rounded-2xl border-2 py-4 text-lg font-semibold transition-all',
                       seedingStatus
-                        ? 'border-gray-300 text-gray-400 cursor-wait'
-                        : 'text-primary hover:bg-indigo-50 dark:hover:bg-gray-700'
+                        ? 'border-stone-300 text-stone-400 cursor-wait dark:border-stone-600'
+                        : 'border-stone-200 dark:border-stone-600 bg-surface-1 text-stone-700 dark:text-stone-200 hover:border-teal-400 dark:hover:border-teal-500 hover:shadow-md'
                     )}
                   >
                     {seedingStatus || '📦 Muat 50 Kata Bawaan'}
                   </button>
+
+                  <p className="text-xs text-stone-400 mt-2">
+                    25 kata Mandarin + 25 kata English dengan terjemahan Indonesia
+                  </p>
                 </div>
-                <p className="mt-4 text-xs text-gray-400">
-                  25 kata Mandarin + 25 kata English dengan terjemahan Indonesia
-                </p>
               </div>
             )
           )}
           {activeTab === 'words' && <WordList />}
-          {activeTab === 'add' && (
-            <>
-              <WordForm onSaved={() => setActiveTab('words')} />
-            </>
-          )}
-        </main>
-      </div>
+          {activeTab === 'add' && <WordForm onSaved={() => setActiveTab('words')} />}
+        </div>
+      </main>
+
+      {/* Bottom Navigation */}
+      <nav className="fixed bottom-0 inset-x-0 z-40 backdrop-blur-xl bg-white/90 dark:bg-stone-950/90 border-t border-stone-200/50 dark:border-stone-700/50">
+        <div className="mx-auto max-w-md flex justify-around py-2 pb-3">
+          {([
+            { key: 'quiz' as Tab, label: `Quiz${dueCount > 0 ? ` (${dueCount})` : ''}`, icon: '🧠' },
+            { key: 'words' as Tab, label: `Kata Saya (${words.length})`, icon: '📚' },
+            { key: 'add' as Tab, label: 'Tambah', icon: '➕' },
+          ]).map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={cn(
+                'flex flex-col items-center gap-0.5 px-4 py-1 transition-colors relative',
+                activeTab === tab.key
+                  ? 'text-teal-600 dark:text-teal-400'
+                  : 'text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300'
+              )}
+            >
+              {activeTab === tab.key && (
+                <div className="absolute -top-0.5 w-5 h-0.5 rounded-full bg-teal-500" />
+              )}
+              <span className="text-lg">{tab.icon}</span>
+              <span className={cn('text-[10px]', activeTab === tab.key ? 'font-semibold' : 'font-medium')}>
+                {tab.label}
+              </span>
+            </button>
+          ))}
+        </div>
+      </nav>
     </div>
   );
 }

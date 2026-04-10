@@ -3,15 +3,14 @@ import { WordForm } from '../../src/components/words/WordForm';
 import { useWordStore } from '../../src/stores/wordStore';
 import { useStreakStore } from '../../src/stores/streakStore';
 import { useSettingsStore } from '../../src/stores/settingsStore';
-import { cn } from '../../src/lib/cn';
 import { useTheme } from '../../src/hooks/useTheme';
 
 type View = 'home' | 'add';
 
 export default function App() {
   const [view, setView] = useState<View>('home');
-  const { words, loadWords, getDueWords } = useWordStore();
-  const { streak, todayReviewed, loadStreak } = useStreakStore();
+  const { words, loadWords, getDueWords, getWordsByLanguage } = useWordStore();
+  const { streak, todayReviewed, totalXp, level, loadStreak } = useStreakStore();
   const { settings, loadSettings } = useSettingsStore();
 
   useTheme(settings.theme);
@@ -23,13 +22,17 @@ export default function App() {
   }, [loadWords, loadStreak, loadSettings]);
 
   const dueCount = getDueWords().length;
+  const zhWords = getWordsByLanguage('zh');
+  const enWords = getWordsByLanguage('en');
+  const zhDue = zhWords.filter(w => w.nextReviewAt <= Date.now() && w.repetitions > 0).length;
+  const enDue = enWords.filter(w => w.nextReviewAt <= Date.now() && w.repetitions > 0).length;
 
   if (view === 'add') {
     return (
-      <div className="p-4 pb-5 dark:bg-gray-900">
+      <div className="p-4 pb-5 w-full bg-surface-0 min-h-full">
         <button
           onClick={() => setView('home')}
-          className="mb-3 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          className="mb-3 text-sm text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200"
         >
           ← Kembali
         </button>
@@ -39,62 +42,104 @@ export default function App() {
   }
 
   return (
-    <div className="p-4 dark:bg-gray-900">
-      {/* Header */}
-      <div className="mb-4 text-center">
-        <h1 className="text-xl font-bold text-gray-900 dark:text-white">🌏 I Speak Hello</h1>
+    <div className="w-full bg-surface-0 min-h-full">
+      {/* Mini Gradient Header */}
+      <div className="relative px-5 pt-4 pb-4 text-white bg-gradient-to-r from-teal-700 to-teal-500">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">🌏</span>
+            <span className="text-base font-bold">I Speak Hello</span>
+          </div>
+          <button
+            onClick={() => chrome.tabs.create({ url: chrome.runtime.getURL('/options.html') })}
+            className="w-7 h-7 rounded-lg bg-white/15 flex items-center justify-center hover:bg-white/25 transition-colors"
+          >
+            <svg className="w-4 h-4 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Stats row inside header */}
+        <div className="flex items-center justify-between bg-white/10 rounded-xl px-4 py-2.5">
+          <div className="text-center">
+            <p className="text-lg font-bold">🔥 {streak}</p>
+            <p className="text-[10px] text-teal-100">Streak</p>
+          </div>
+          <div className="h-6 w-px bg-white/20" />
+          <div className="text-center">
+            <p className="text-lg font-bold">{todayReviewed}/{settings.dailyGoal}</p>
+            <p className="text-[10px] text-teal-100">Target</p>
+          </div>
+          <div className="h-6 w-px bg-white/20" />
+          <div className="text-center">
+            <div className="flex items-center gap-1 rounded-full bg-yellow-500/20 px-2 py-0.5 mx-auto">
+              <span className="text-xs">⭐</span>
+              <span className="text-sm font-bold">Lv.{level}</span>
+            </div>
+            <p className="text-[10px] text-teal-100">{totalXp} XP</p>
+          </div>
+        </div>
       </div>
 
-      {/* Stats */}
-      <div className="mb-4 grid grid-cols-3 gap-3">
-        <div className="rounded-xl bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/30 dark:to-orange-800/30 p-3 text-center">
-          <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">🔥 {streak}</p>
-          <p className="text-xs text-orange-500 dark:text-orange-400">Streak</p>
-        </div>
-        <div className="rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 p-3 text-center">
-          <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{todayReviewed}</p>
-          <p className="text-xs text-blue-500 dark:text-blue-400">Hari Ini</p>
-        </div>
-        <div className="rounded-xl bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 p-3 text-center">
-          <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{dueCount}</p>
-          <p className="text-xs text-purple-500 dark:text-purple-400">Perlu Review</p>
-        </div>
-      </div>
+      <div className="px-5 py-4">
+        {/* Primary CTA: Start Quiz */}
+        <button
+          onClick={() => chrome.tabs.create({ url: chrome.runtime.getURL('/newtab.html') })}
+          disabled={dueCount === 0}
+          className={`w-full rounded-2xl py-4 px-5 mb-3 font-semibold text-base shadow-lg transition-all flex items-center justify-between ${
+            dueCount > 0
+              ? 'text-white bg-gradient-to-r from-teal-700 to-teal-600 hover:shadow-xl'
+              : 'text-stone-400 bg-stone-100 dark:bg-stone-700 dark:text-stone-500 cursor-not-allowed shadow-none'
+          }`}
+          style={dueCount > 0 ? { boxShadow: '0 4px 12px rgba(15,118,110,0.3)' } : undefined}
+        >
+          <div className="flex items-center gap-3">
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+            <div className="text-left">
+              <p>{dueCount > 0 ? 'Mulai Quiz' : 'Tidak ada kata untuk review'}</p>
+              {dueCount > 0 && (
+                <p className="text-xs text-teal-200 font-normal">{dueCount} kata perlu review</p>
+              )}
+            </div>
+          </div>
+          {dueCount > 0 && (
+            <svg className="w-5 h-5 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          )}
+        </button>
 
-      {/* Total words */}
-      <p className="mb-4 text-center text-sm text-gray-500 dark:text-gray-400">
-        {words.length} kata tersimpan
-      </p>
+        {/* Language Breakdown */}
+        <div className="grid grid-cols-2 gap-2 mb-3">
+          {settings.learningLanguages.includes('zh') && (
+            <div className="rounded-xl bg-surface-1 ring-1 ring-stone-900/5 dark:ring-white/5 px-3 py-2.5 flex items-center gap-2.5">
+              <span className="text-lg">🇨🇳</span>
+              <div>
+                <p className="text-sm font-semibold text-stone-700 dark:text-stone-200">{zhWords.length} kata</p>
+                {zhDue > 0 && <p className="text-[10px] text-red-500 font-medium">{zhDue} perlu review</p>}
+              </div>
+            </div>
+          )}
+          {settings.learningLanguages.includes('en') && (
+            <div className="rounded-xl bg-surface-1 ring-1 ring-stone-900/5 dark:ring-white/5 px-3 py-2.5 flex items-center gap-2.5">
+              <span className="text-lg">🇬🇧</span>
+              <div>
+                <p className="text-sm font-semibold text-stone-700 dark:text-stone-200">{enWords.length} kata</p>
+                {enDue > 0 && <p className="text-[10px] text-red-500 font-medium">{enDue} perlu review</p>}
+              </div>
+            </div>
+          )}
+        </div>
 
-      {/* Actions */}
-      <div className="space-y-2">
+        {/* Add Word */}
         <button
           onClick={() => setView('add')}
-          className="w-full rounded-lg bg-primary py-3 font-medium text-white hover:bg-primary-dark transition-colors"
+          className="w-full rounded-xl border-2 border-stone-200 dark:border-stone-600 bg-surface-1 py-3 px-4 text-sm font-medium text-stone-700 dark:text-stone-200 hover:border-teal-400 dark:hover:border-teal-600 transition-all flex items-center justify-center gap-2"
         >
-          + Tambah Kata Baru
-        </button>
-        <button
-          onClick={() => {
-            chrome.tabs.create({ url: chrome.runtime.getURL('/newtab.html') });
-          }}
-          className={cn(
-            'w-full rounded-lg py-3 font-medium transition-colors',
-            dueCount > 0
-              ? 'bg-green-500 text-white hover:bg-green-600'
-              : 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500'
-          )}
-          disabled={dueCount === 0}
-        >
-          {dueCount > 0 ? `Mulai Quiz (${dueCount} kata)` : 'Tidak ada kata untuk review'}
-        </button>
-        <button
-          onClick={() => {
-            chrome.tabs.create({ url: chrome.runtime.getURL('/options.html') });
-          }}
-          className="w-full rounded-lg border border-gray-200 py-2 text-sm text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
-        >
-          ⚙️ Pengaturan
+          <svg className="w-4 h-4 text-teal-500" fill="currentColor" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" /></svg>
+          Tambah Kata Baru
         </button>
       </div>
     </div>

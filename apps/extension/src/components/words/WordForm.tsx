@@ -107,13 +107,13 @@ export function WordForm({ onSaved }: WordFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
+      <h2 className="text-lg font-semibold text-stone-800 dark:text-white">
         Tambah Kata Baru
       </h2>
 
       {/* Language selector */}
       <div>
-        <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-300">
+        <label className="mb-1 block text-sm font-medium text-stone-600 dark:text-stone-300">
           Bahasa yang dipelajari
         </label>
         <div className="flex gap-2">
@@ -126,7 +126,7 @@ export function WordForm({ onSaved }: WordFormProps) {
                 "rounded-lg px-4 py-2 text-sm font-medium transition-colors",
                 targetLanguage === lang
                   ? "bg-primary text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300",
+                  : "bg-stone-100 text-stone-600 hover:bg-stone-200 dark:bg-stone-700 dark:text-stone-300",
               )}
             >
               {LANGUAGES[lang].flag} {LANGUAGES[lang].nativeName}
@@ -141,7 +141,7 @@ export function WordForm({ onSaved }: WordFormProps) {
 
       {/* Word */}
       <div>
-        <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-300">
+        <label className="mb-1 block text-sm font-medium text-stone-600 dark:text-stone-300">
           Kata ({LANGUAGES[targetLanguage].nativeName})
         </label>
         <input
@@ -149,11 +149,11 @@ export function WordForm({ onSaved }: WordFormProps) {
           value={original}
           onChange={(e) => setOriginal(e.target.value)}
           placeholder={targetLanguage === "zh" ? "你好" : "hello"}
-          className="w-full rounded-lg border border-gray-200 px-4 py-2 outline-none focus:border-primary dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+          className="w-full rounded-lg border border-stone-200 px-4 py-2 outline-none focus:border-primary dark:border-stone-600 dark:bg-stone-800 dark:text-white"
           required
         />
         {hasApiKey && (
-          <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+          <p className="mt-1 text-xs text-stone-400 dark:text-stone-500">
             {targetLanguage === "zh"
               ? "🤖 Cukup tulis hanzi — AI auto-generate arti, pinyin, kalimat & quiz"
               : "🤖 AI akan otomatis menerjemahkan dan membuat contoh kalimat"}
@@ -164,7 +164,7 @@ export function WordForm({ onSaved }: WordFormProps) {
       {/* Translation — only shown when no API key */}
       {!hasApiKey && (
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-300">
+          <label className="mb-1 block text-sm font-medium text-stone-600 dark:text-stone-300">
             Arti (Bahasa Indonesia)
           </label>
           <input
@@ -172,7 +172,7 @@ export function WordForm({ onSaved }: WordFormProps) {
             value={translation}
             onChange={(e) => setTranslation(e.target.value)}
             placeholder="halo"
-            className="w-full rounded-lg border border-gray-200 px-4 py-2 outline-none focus:border-primary dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+            className="w-full rounded-lg border border-stone-200 px-4 py-2 outline-none focus:border-primary dark:border-stone-600 dark:bg-stone-800 dark:text-white"
             required
           />
         </div>
@@ -180,7 +180,7 @@ export function WordForm({ onSaved }: WordFormProps) {
 
       {/* Notes */}
       <div>
-        <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-300">
+        <label className="mb-1 block text-sm font-medium text-stone-600 dark:text-stone-300">
           Catatan (opsional)
         </label>
         <textarea
@@ -188,7 +188,7 @@ export function WordForm({ onSaved }: WordFormProps) {
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Catatan pribadi tentang kata ini..."
           rows={2}
-          className="w-full rounded-lg border border-gray-200 px-4 py-2 outline-none focus:border-primary dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+          className="w-full rounded-lg border border-stone-200 px-4 py-2 outline-none focus:border-primary dark:border-stone-600 dark:bg-stone-800 dark:text-white"
         />
       </div>
 
@@ -204,7 +204,7 @@ export function WordForm({ onSaved }: WordFormProps) {
         className={cn(
           "w-full rounded-lg py-3 font-medium text-white transition-colors",
           saving
-            ? "bg-gray-400 cursor-not-allowed"
+            ? "bg-stone-400 cursor-not-allowed"
             : "bg-primary hover:bg-primary-dark",
         )}
       >
@@ -216,7 +216,7 @@ export function WordForm({ onSaved }: WordFormProps) {
       </button>
 
       {!hasApiKey && (
-        <p className="text-center text-xs text-gray-400 dark:text-gray-500">
+        <p className="text-center text-xs text-stone-400 dark:text-stone-500">
           💡 Tambahkan OpenRouter API key di Pengaturan untuk auto-translate dan
           generate kalimat
         </p>

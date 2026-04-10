@@ -9,7 +9,9 @@ export function StreakCounter({ streak, className }: StreakCounterProps) {
   return (
     <div className={cn('flex items-center gap-1', className)}>
       <span className={cn('text-xl', streak > 0 ? 'animate-bounce' : '')}>🔥</span>
-      <span className="font-bold text-orange-500">{streak}</span>
+      <span className={cn('font-bold', streak > 0 ? 'text-orange-500' : 'text-stone-300 dark:text-stone-600')}>
+        {streak}
+      </span>
     </div>
   );
 }

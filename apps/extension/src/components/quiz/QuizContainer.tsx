@@ -10,6 +10,7 @@ import { MultipleChoice } from './MultipleChoice';
 import { TypeAnswer } from './TypeAnswer';
 import { SentenceCompletion } from './SentenceCompletion';
 import { QuizResult } from './QuizResult';
+import { cn } from '../../lib/cn';
 
 interface QuizContainerProps {
   onGoToWords?: () => void;
@@ -48,17 +49,14 @@ export function QuizContainer({ onGoToWords }: QuizContainerProps = {}) {
     const { word, quizType } = question;
     const responseTimeMs = Date.now() - startTime;
 
-    // Use shared helper: SRS update + review log + streak
     const { xp, wasCorrect } = await recordQuizAnswer(word, quality, quizType, responseTimeMs);
 
-    // Refresh Zustand stores so UI reflects updated data
     await loadWords();
     await loadStreak();
 
     setResults(prev => [...prev, { wordId: word.id, quizType, wasCorrect }]);
     setTotalXp(prev => prev + xp);
 
-    // Next question or finish
     if (currentIndex + 1 < questions.length) {
       setCurrentIndex(prev => prev + 1);
       setStartTime(Date.now());
@@ -71,16 +69,16 @@ export function QuizContainer({ onGoToWords }: QuizContainerProps = {}) {
     return (
       <div className="py-20 text-center">
         <p className="text-5xl">🎉</p>
-        <h2 className="mt-4 text-xl font-semibold text-gray-700 dark:text-gray-200">
+        <h2 className="mt-4 text-xl font-semibold text-stone-700 dark:text-stone-200">
           Semua kata sudah di-review!
         </h2>
-        <p className="mt-2 text-gray-500 dark:text-gray-400">
+        <p className="mt-2 text-stone-500 dark:text-stone-400">
           Kembali lagi nanti untuk review selanjutnya.
         </p>
         {onGoToWords && (
           <button
             onClick={onGoToWords}
-            className="mt-6 rounded-lg border-2 border-primary px-6 py-3 font-medium text-primary hover:bg-indigo-50 dark:hover:bg-gray-700 transition-colors"
+            className="mt-6 rounded-2xl border-2 border-stone-200 dark:border-stone-600 px-6 py-3 font-medium text-stone-700 dark:text-stone-200 hover:border-teal-400 dark:hover:border-teal-500 transition-colors"
           >
             📚 Lihat Kata Saya
           </button>
@@ -117,23 +115,35 @@ export function QuizContainer({ onGoToWords }: QuizContainerProps = {}) {
   const question = questions[currentIndex];
 
   return (
-    <div>
-      {/* Progress bar */}
-      <div className="mb-6 flex items-center gap-3">
-        <div className="h-2 flex-1 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
-          <div
-            className="h-full rounded-full bg-primary transition-all duration-300"
-            style={{ width: `${((currentIndex) / questions.length) * 100}%` }}
-          />
-        </div>
-        <span className="text-sm text-gray-500 dark:text-gray-400">
-          {currentIndex + 1}/{questions.length}
-        </span>
+    <div className="w-full">
+      {/* Step Dots Progress */}
+      <div className="flex items-center justify-center gap-2 mb-2">
+        {questions.map((_, i) => {
+          const result = results[i];
+          const isCurrent = i === currentIndex;
+          return (
+            <div
+              key={i}
+              className={cn(
+                'rounded-full transition-all',
+                isCurrent
+                  ? 'w-3 h-3 bg-teal-600 ring-4 ring-teal-500/20 animate-pulse-glow'
+                  : 'w-2.5 h-2.5',
+                !isCurrent && result?.wasCorrect === true && 'bg-green-500',
+                !isCurrent && result?.wasCorrect === false && 'bg-red-500',
+                !isCurrent && result === undefined && 'bg-stone-300 dark:bg-stone-600',
+              )}
+            />
+          );
+        })}
       </div>
+      <p className="text-center text-xs text-stone-400 mb-4">
+        {currentIndex + 1} / {questions.length}
+      </p>
 
       {/* Quiz type badge */}
-      <div className="mb-4 flex justify-center">
-        <span className="rounded-full bg-indigo-100 px-3 py-1 text-xs font-medium text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300">
+      <div className="mb-3 flex justify-center">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-teal-50 dark:bg-teal-950/30 px-3 py-1 text-xs font-medium text-teal-700 dark:text-teal-400">
           {question.quizType === 'flashcard' && '🃏 Flashcard'}
           {question.quizType === 'mcq' && '📝 Pilihan Ganda'}
           {question.quizType === 'typing' && '⌨️ Ketik Jawaban'}

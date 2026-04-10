@@ -13,12 +13,12 @@ export function XPBar({ totalXp, level, className }: XPBarProps) {
   return (
     <div className={cn('w-full', className)}>
       <div className="mb-1 flex items-center justify-between text-xs">
-        <span className="font-medium text-purple-600 dark:text-purple-400">⭐ Level {level}</span>
-        <span className="text-gray-400">{current}/{needed} XP</span>
+        <span className="font-medium text-yellow-700 dark:text-yellow-400">⭐ Level {level}</span>
+        <span className="text-stone-400">{current}/{needed} XP</span>
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+      <div className="h-2 overflow-hidden rounded-full bg-stone-200 dark:bg-stone-700">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500"
+          className="h-full rounded-full bg-gradient-to-r from-yellow-500 to-yellow-400 transition-all duration-500"
           style={{ width: `${progress * 100}%` }}
         />
       </div>
