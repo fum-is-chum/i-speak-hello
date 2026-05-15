@@ -65,6 +65,12 @@ export default defineContentScript({
     const mountPoint = document.createElement('div');
     shadow.appendChild(mountPoint);
 
+    // Stop keyboard events from leaking through to the host page
+    // (e.g. YouTube 'M' to mute, 'K' to pause, etc.)
+    for (const evt of ['keydown', 'keyup', 'keypress'] as const) {
+      shadow.addEventListener(evt, e => e.stopPropagation());
+    }
+
     // Prevent scrolling on the page behind the overlay
     document.documentElement.style.overflow = 'hidden';
 

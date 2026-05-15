@@ -151,7 +151,7 @@ export function SiteBlockerOverlay({ settings, words, hostname, onUnlock }: Prop
   const isSentenceQuiz = question.quizType === 'sentence';
 
   return (
-    <div style={{ position:'fixed', inset:0, zIndex:2147483647, display:'flex', alignItems:'center', justifyContent:'center', background:c.overlay, backdropFilter:'blur(12px)', fontFamily:'Inter,-apple-system,BlinkMacSystemFont,sans-serif' }}>
+    <div onKeyDown={e => e.stopPropagation()} onKeyUp={e => e.stopPropagation()} onKeyPress={e => e.stopPropagation()} style={{ position:'fixed', inset:0, zIndex:2147483647, display:'flex', alignItems:'center', justifyContent:'center', background:c.overlay, backdropFilter:'blur(12px)', fontFamily:'Inter,-apple-system,BlinkMacSystemFont,sans-serif' }}>
       <div style={{ background:c.cardBg, borderRadius:'24px', maxWidth:'480px', width:'90%', overflow:'hidden', boxShadow: isDark ? '0 25px 60px rgba(0,0,0,0.5)' : '0 25px 60px rgba(0,0,0,0.3)' }}>
 
         {/* Gradient Header */}
