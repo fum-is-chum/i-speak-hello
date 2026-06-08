@@ -8,12 +8,12 @@ import { useTheme } from '../../src/hooks/useTheme';
 import { ExcelImportSection } from '../../src/components/import/ExcelImportSection';
 
 const OPENROUTER_MODEL_SUGGESTIONS = [
-  'google/gemini-2.0-flash-001',
   'google/gemini-2.5-flash',
-  'openai/gpt-4o-mini',
-  'anthropic/claude-3.5-haiku',
+  'google/gemini-2.5-flash-lite',
+  'openai/gpt-5-mini',
+  'anthropic/claude-haiku-4.5',
   'meta-llama/llama-3.3-70b-instruct',
-  'deepseek/deepseek-chat',
+  'deepseek/deepseek-chat-v3.1',
 ];
 
 const ALL_QUIZ_TYPES: { key: QuizType; label: string; desc: string }[] = [

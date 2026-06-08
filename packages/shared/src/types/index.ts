@@ -4,7 +4,7 @@ export type WordSource = 'manual' | 'telegram' | 'import' | 'seed';
 export type QuizType = 'flashcard' | 'mcq' | 'typing' | 'sentence';
 export type SRSStatus = 'new' | 'learning' | 'mastered';
 
-export const DEFAULT_OPENROUTER_MODEL = 'google/gemini-2.0-flash-001';
+export const DEFAULT_OPENROUTER_MODEL = 'google/gemini-2.5-flash';
 
 export interface Word {
   id: string;
@@ -105,7 +105,7 @@ export interface UserSettings {
   autoSpeakOnQuiz: boolean;      // auto-play TTS when quiz question appears
   theme: 'light' | 'dark' | 'system';
   openRouterApiKey?: string;
-  openRouterModel?: string;      // OpenRouter model id, e.g. 'google/gemini-2.0-flash-001'
+  openRouterModel?: string;      // OpenRouter model id, e.g. 'google/gemini-2.5-flash'
   siteBlocker: SiteBlockerSettings;
   difficultyBias: number;       // 0-100, 0=easy (flashcard/MCQ), 100=hard (typing/sentence)
   newWordRatio: number;          // 0-100 percentage of new words in session
