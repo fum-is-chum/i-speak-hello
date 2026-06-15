@@ -16,23 +16,41 @@ export function buildQuizSession(
 
   const now = Date.now();
 
-  // Split into due and new words
-  const dueWords = allWords.filter(w => w.nextReviewAt <= now && w.repetitions > 0);
-  const newWords = allWords.filter(w => w.repetitions === 0);
+  // A word is "mastered" once its SRS interval reaches the 21-day threshold
+  // (mirrors getSRSStatus in @i-speak-hello/shared).
+  const MASTERED_INTERVAL_DAYS = 21;
+  const isMastered = (w: Word) => w.repetitions > 0 && w.intervalDays >= MASTERED_INTERVAL_DAYS;
 
-  // Select words: use configurable ratio instead of hardcoded 80/20
+  // Split into new, due-learning (un-mastered), and due-mastered words.
+  const newWords = allWords.filter(w => w.repetitions === 0);
+  const dueWords = allWords.filter(w => w.nextReviewAt <= now && w.repetitions > 0);
+  const dueLearning = dueWords.filter(w => !isMastered(w));
+  const dueMastered = dueWords.filter(w => isMastered(w));
+
+  // Select words: use configurable ratio instead of hardcoded 80/20.
   const newRatio = Math.max(0, Math.min(100, newWordRatio)) / 100;
   const newCount = Math.min(Math.ceil(wordsPerSession * newRatio), newWords.length);
-  const dueCount = Math.min(wordsPerSession - newCount, dueWords.length);
-
-  const selectedDue = shuffle(dueWords).slice(0, dueCount);
   const selectedNew = shuffle(newWords).slice(0, newCount);
-  let selected = shuffle([...selectedDue, ...selectedNew]);
 
-  // If we still don't have enough, fill with any words
+  // Fill the remaining slots prioritizing un-mastered words: learning words
+  // first, and only fall back to mastered words when nothing else is due.
+  // This keeps the quiz focused on new/un-mastered vocabulary.
+  let dueBudget = wordsPerSession - selectedNew.length;
+  const selectedDueLearning = shuffle(dueLearning).slice(0, dueBudget);
+  dueBudget -= selectedDueLearning.length;
+  const selectedDueMastered = shuffle(dueMastered).slice(0, Math.max(0, dueBudget));
+
+  let selected = shuffle([...selectedNew, ...selectedDueLearning, ...selectedDueMastered]);
+
+  // If we still don't have enough, fill with remaining words, still preferring
+  // un-mastered (not-yet-due learning) words over mastered ones.
   if (selected.length < wordsPerSession) {
-    const remaining = allWords.filter(w => !selected.find(s => s.id === w.id));
-    selected = [...selected, ...shuffle(remaining).slice(0, wordsPerSession - selected.length)];
+    const selectedIds = new Set(selected.map(s => s.id));
+    const remaining = allWords.filter(w => !selectedIds.has(w.id));
+    const remainingUnmastered = remaining.filter(w => !isMastered(w));
+    const remainingMastered = remaining.filter(w => isMastered(w));
+    const fill = [...shuffle(remainingUnmastered), ...shuffle(remainingMastered)];
+    selected = [...selected, ...fill.slice(0, wordsPerSession - selected.length)];
   }
 
   // Build questions
